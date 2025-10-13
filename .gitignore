@@ -1,0 +1,21 @@
+﻿# Archivos de Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Carpetas de compilación
+bin/
+obj/
+
+# Archivos de configuración local
+appsettings.Development.json
+
+# Archivos temporales
+*.log
+*.tmp
+*.bak
+
+# Archivos de publicación
+publish/
