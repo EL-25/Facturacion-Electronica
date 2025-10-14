@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Factura";
+}
+
+<style>
+    body {
+        background: linear-gradient(to right, #007bff, #00c6ff);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 420px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+
+    .login-header {
+        background-color: #004080;
+        color: white;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .login-body {
+        background-color: white;
+        padding: 30px;
+    }
+
+    .login-footer {
+        background-color: #f8f9fa;
+        text-align: center;
+        padding: 10px;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #007bff;
+    }
+
+    .btn-login {
+        transition: transform 0.2s ease;
+    }
+
+        .btn-login:hover {
+            transform: scale(1.03);
+        }
+
+    .input-group-text {
+        background-color: #e9ecef;
+    }
+</style>
+
+<div class="login-card">
+    <div class="login-header">
+        <h2>Factura</h2>
+    </div>
+    <div class="login-body">
+        <p style="text-align:center;">Aquí irá el formulario o resumen de la factura electrónica.</p>
+    </div>
+    <div class="login-footer">
+        Ministerio de Hacienda – El Salvador
+    </div>
+</div>

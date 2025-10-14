@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Confirmación de DTE";
+}
+
+<h2>Factura Generada</h2>
+
+<pre style="background:#f4f4f4; padding:1em; border:1px solid #ccc;">
+@ViewBag.Json
+</pre>
+
+<a asp-action="Crear">Generar otra factura</a>

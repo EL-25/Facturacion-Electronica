@@ -19,13 +19,23 @@ namespace FacturacionElectronicaSV.Models
         [StringLength(20)]
         public string NumeroDocumento { get; set; }
 
+        [StringLength(10)]
+        public string CodActividad { get; set; } // ← requerido por Hacienda
+
+        [StringLength(100)]
+        public string DescActividad { get; set; } // ← requerido por Hacienda
+
+        [StringLength(100)]
+        public string Correo { get; set; } // ← requerido por Hacienda
+
         [StringLength(200)]
-        public string Direccion { get; set; }
+        public string Complemento { get; set; } // ← parte de Dirección
 
         [StringLength(50)]
         public string Municipio { get; set; }
 
         [StringLength(50)]
         public string Departamento { get; set; }
+        public int Id { get; internal set; }
     }
 }

@@ -9,23 +9,23 @@ namespace FacturacionElectronicaSV.Models
         public int IdResumen { get; set; }
 
         [Required]
-        [Range(0.00, double.MaxValue)]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal TotalGravado { get; set; }
 
         [Required]
-        [Range(0.00, double.MaxValue)]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal TotalExento { get; set; }
 
         [Required]
-        [Range(0.00, double.MaxValue)]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal TotalNoSujeto { get; set; }
 
         [Required]
-        [Range(0.00, double.MaxValue)]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal IVA { get; set; }
 
         [Required]
-        [Range(0.00, double.MaxValue)]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal TotalPagar { get; set; }
 
         // Relación con Documento

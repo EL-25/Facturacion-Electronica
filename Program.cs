@@ -1,18 +1,29 @@
-using FacturacionElectronicaSV.Data;
+﻿using FacturacionElectronicaSV.Data;
+using FacturacionElectronicaSV.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Conexi�n a la base de datos
+// Conexión a la base de datos
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add services to the container.
+// Autenticación por cookies
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Cuenta/Login";
+        options.LogoutPath = "/Cuenta/Logout";
+    });
+
+// Servicios
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IFacturaService, FacturaService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -24,6 +35,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication(); // ← importante si usás cookies
 app.UseAuthorization();
 
 app.MapControllerRoute(

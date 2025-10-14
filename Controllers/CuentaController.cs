@@ -1,7 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using FacturacionElectronicaSV.Data;
 using FacturacionElectronicaSV.Models;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace FacturacionElectronicaSV.Controllers
 {
@@ -22,19 +27,63 @@ namespace FacturacionElectronicaSV.Controllers
 
         // POST: /Cuenta/Login
         [HttpPost]
-        public IActionResult Login(string nombreUsuario, string clave)
+        public async Task<IActionResult> Login(string nombreUsuario, string clave)
         {
-            var usuario = _context.Usuarios
-                .FirstOrDefault(u => u.NombreUsuario == nombreUsuario && u.Clave == clave);
+            var usuario = _context.Usuario
+                .FirstOrDefault(u => u.NombreUsuario == nombreUsuario);
 
-            if (usuario != null)
+            if (usuario == null)
             {
-                // Aqui se podria guardar sesión si queremos
-                return RedirectToAction("Index", "Home");
+                ViewBag.Error = "El usuario no existe.";
+                return View();
             }
 
-            ViewBag.Error = "Usuario o contraseña incorrectos.";
+            if (usuario.Clave != clave)
+            {
+                ViewBag.Error = "La contraseña es incorrecta.";
+                return View();
+            }
+
+            // Crear claims para el usuario
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.Name, usuario.NombreUsuario),
+                new Claim("NombreUsuario", usuario.NombreUsuario)
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            // Crear cookie de autenticación
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            return RedirectToAction("Index", "Documento");
+        }
+
+        // GET: /Cuenta/Logout
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login", "Cuenta");
+        }
+
+        [HttpGet]
+        public IActionResult Registrar()
+        {
             return View();
         }
+
+        [HttpPost]
+        public IActionResult Registrar(Usuario usuario)
+        {
+            if (!ModelState.IsValid)
+                return View(usuario);
+
+            _context.Usuario.Add(usuario);
+            _context.SaveChanges();
+
+            return RedirectToAction("Login");
+        }
+
     }
 }

@@ -9,7 +9,11 @@ namespace FacturacionElectronicaSV.Models
 
         [Required]
         [StringLength(100)]
-        public string NombreComercial { get; set; }
+        public string Nombre { get; set; } // ← Nombre legal del emisor
+
+        [Required]
+        [StringLength(100)]
+        public string NombreComercial { get; set; } // ← Nombre visible en la factura
 
         [Required]
         [StringLength(14)]
@@ -18,22 +22,28 @@ namespace FacturacionElectronicaSV.Models
         [StringLength(10)]
         public string NRC { get; set; }
 
+        [StringLength(10)]
+        public string CodActividad { get; set; }
+
         [StringLength(100)]
-        public string ActividadEconomica { get; set; }
+        public string DescActividad { get; set; }
+
+        [StringLength(10)]
+        public string TipoEstablecimiento { get; set; }
 
         [StringLength(200)]
-        public string Direccion { get; set; }
-
-        [StringLength(50)]
-        public string Municipio { get; set; }
+        public string Complemento { get; set; }
 
         [StringLength(50)]
         public string Departamento { get; set; }
 
-        [StringLength(10)]
-        public string CodigoEstablecimiento { get; set; }
+        [StringLength(50)]
+        public string Municipio { get; set; }
 
-        [StringLength(10)]
-        public string CodigoSucursal { get; set; }
+        [StringLength(20)]
+        public string Telefono { get; set; }
+
+        [StringLength(100)]
+        public string Correo { get; set; }
     }
 }

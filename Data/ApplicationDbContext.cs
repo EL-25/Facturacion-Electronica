@@ -8,11 +8,11 @@ namespace FacturacionElectronicaSV.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
 
-        public DbSet<Emisor> Emisores { get; set; }
+        public DbSet<Emisor> Emisor { get; set; }
         public DbSet<Receptor> Receptores { get; set; }
         public DbSet<Documento> Documentos { get; set; }
         public DbSet<DetalleDocumento> DetallesDocumento { get; set; }
         public DbSet<Resumen> Resumenes { get; set; }
-        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Usuario> Usuario { get; set; }
     }
 }
