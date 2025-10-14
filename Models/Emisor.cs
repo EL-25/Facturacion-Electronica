@@ -45,5 +45,7 @@ namespace FacturacionElectronicaSV.Models
 
         [StringLength(100)]
         public string Correo { get; set; }
+        public string TipoDocumento { get; internal set; }
+      
     }
 }

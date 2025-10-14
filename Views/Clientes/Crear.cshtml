@@ -1,0 +1,96 @@
+﻿@model FacturacionElectronicaSV.Models.Receptor
+
+<div class="container mt-4">
+    <h4>Registrar Cliente</h4>
+
+    <form asp-action="Crear" method="post">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Nombre" class="form-label">Nombre o Razón Social</label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="TipoDocumento" class="form-label">Tipo de Documento</label>
+                <select asp-for="TipoDocumento" class="form-select" id="TipoDocumento">
+                    <option value="DUI">DUI</option>
+                    <option value="NIT">NIT</option>
+                    <option value="Pasaporte">Pasaporte</option>
+                </select>
+                <span asp-validation-for="TipoDocumento" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="NumeroDocumento" class="form-label">Número de Documento</label>
+                <input asp-for="NumeroDocumento" class="form-control" id="NumeroDocumento" />
+                <span asp-validation-for="NumeroDocumento" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Correo" class="form-label">Correo Electrónico</label>
+                <input asp-for="Correo" class="form-control" />
+                <span asp-validation-for="Correo" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Departamento" class="form-label">Departamento</label>
+                <input asp-for="Departamento" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Municipio" class="form-label">Municipio</label>
+                <input asp-for="Municipio" class="form-control" />
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="Complemento" class="form-label">Complemento Dirección</label>
+                <input asp-for="Complemento" class="form-control" />
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success px-5">Guardar Cliente</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const tipoDocumento = document.getElementById("TipoDocumento");
+        const numeroDocumento = document.getElementById("NumeroDocumento");
+
+        tipoDocumento.addEventListener("change", function () {
+            const tipo = tipoDocumento.value;
+            numeroDocumento.value = "";
+            numeroDocumento.classList.remove("is-valid", "is-invalid");
+
+            if (tipo === "DUI") {
+                numeroDocumento.placeholder = "00000000-0";
+            } else if (tipo === "NIT") {
+                numeroDocumento.placeholder = "0000-000000-000-0";
+            } else {
+                numeroDocumento.placeholder = "Documento";
+            }
+        });
+
+        numeroDocumento.addEventListener("input", function () {
+            const tipo = tipoDocumento.value;
+            const valor = numeroDocumento.value.trim();
+            let valido = false;
+
+            if (tipo === "DUI") {
+                valido = /^\d{8}-\d{1}$/.test(valor);
+            } else if (tipo === "NIT") {
+                valido = /^\d{4}-\d{6}-\d{3}-\d{1}$/.test(valor);
+            }
+
+            numeroDocumento.classList.toggle("is-valid", valido);
+            numeroDocumento.classList.toggle("is-invalid", !valido && valor.length > 0);
+        });
+    </script>
+}

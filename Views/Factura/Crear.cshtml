@@ -111,64 +111,118 @@
                 <input type="number" class="form-control" name="TotalPagarResumen" value="0.00" readonly />
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-6 mb-3">
+        <hr />
+
+
+        <h5 class="mt-4">Datos del Receptor</h5>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
                 <label asp-for="IdCliente" class="form-label">Cliente</label>
                 <select asp-for="IdCliente" asp-items="@(new SelectList(ViewBag.Clientes, "IdReceptor", "Nombre"))" class="form-select"></select>
                 <span asp-validation-for="IdCliente" class="text-danger"></span>
             </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="FormaPago" class="form-label">Forma de Pago</label>
-                <select asp-for="FormaPago" class="form-select">
-                    @foreach (var fp in ViewBag.FormasPago)
-                    {
-                        <option value="@fp.Codigo">@fp.Nombre</option>
-                    }
+        </div>
+        <hr />
+
+        <h5 class="mt-4">Datos del Emisor</h5>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label asp-for="Emisor.TipoDocumento" class="form-label">Tipo Documento</label>
+                <select asp-for="Emisor.TipoDocumento" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="DUI">DUI</option>
+                    <option value="NIT">NIT</option>
+                    <option value="Pasaporte">Pasaporte</option>
                 </select>
-                <span asp-validation-for="FormaPago" class="text-danger"></span>
+                <span asp-validation-for="Emisor.TipoDocumento" class="text-danger"></span>
             </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="NumeroControl" class="form-label">Número de Control</label>
-                <input asp-for="NumeroControl" class="form-control" />
-                <span asp-validation-for="NumeroControl" class="text-danger"></span>
+            <div class="col-md-8">
+                <label asp-for="Emisor.Nombre" class="form-label">Nombre o Razón Social</label>
+                <input asp-for="Emisor.Nombre" class="form-control" />
+                <span asp-validation-for="Emisor.Nombre" class="text-danger"></span>
             </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="SubTotal" class="form-label">Subtotal</label>
-                <input asp-for="SubTotal" class="form-control" />
-                <span asp-validation-for="SubTotal" class="text-danger"></span>
+            <div class="col-md-4">
+                <label asp-for="Emisor.Departamento" class="form-label">Departamento</label>
+                <input asp-for="Emisor.Departamento" class="form-control" />
+                <span asp-validation-for="Emisor.Departamento" class="text-danger"></span>
             </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="TotalGravada" class="form-label">Total Gravada</label>
-                <input asp-for="TotalGravada" class="form-control" />
-                <span asp-validation-for="TotalGravada" class="text-danger"></span>
+            <div class="col-md-4">
+                <label asp-for="Emisor.Municipio" class="form-label">Municipio</label>
+                <input asp-for="Emisor.Municipio" class="form-control" />
+                <span asp-validation-for="Emisor.Municipio" class="text-danger"></span>
             </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="TotalIVA" class="form-label">Total IVA</label>
-                <input asp-for="TotalIVA" class="form-control" />
-                <span asp-validation-for="TotalIVA" class="text-danger"></span>
+            <div class="col-md-4">
+                <label asp-for="Emisor.Complemento" class="form-label">Complemento</label>
+                <input asp-for="Emisor.Complemento" class="form-control" />
+                <span asp-validation-for="Emisor.Complemento" class="text-danger"></span>
             </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="TotalPagar" class="form-label">Total a Pagar</label>
-                <input asp-for="TotalPagar" class="form-control" />
-                <span asp-validation-for="TotalPagar" class="text-danger"></span>
+            <div class="col-md-6">
+                <label asp-for="Emisor.Correo" class="form-label">Correo electrónico</label>
+                <input asp-for="Emisor.Correo" class="form-control" />
+                <span asp-validation-for="Emisor.Correo" class="text-danger"></span>
             </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="TotalLetras" class="form-label">Total en Letras</label>
-                <input asp-for="TotalLetras" class="form-control" />
-                <span asp-validation-for="TotalLetras" class="text-danger"></span>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="Contrasena" class="form-label">Contraseña</label>
-                <input asp-for="Contrasena" type="password" class="form-control" />
-                <span asp-validation-for="Contrasena" class="text-danger"></span>
+            <div class="col-md-6">
+                <label asp-for="Emisor.Telefono" class="form-label">Teléfono</label>
+                <input asp-for="Emisor.Telefono" class="form-control" />
+                <span asp-validation-for="Emisor.Telefono" class="text-danger"></span>
             </div>
         </div>
+        <hr />
+
+        <div class="row">
+            
+            <div class="col-md-6 mb-3">
+                <label asp-for="FormaPago" class="form-label">Forma de Pago</label>
+                <div class="input-group">
+                    <select asp-for="FormaPago" class="form-select">
+                        @foreach (var fp in ViewBag.FormasPago)
+                        {
+                            <option value="@fp.Codigo">@fp.Nombre</option>
+                        }
+                    </select>
+                    <button type="button" class="btn btn-outline-primary" id="btnConfirmarPago">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="FormaPago" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Monto Confirmado</label>
+                <input type="number" class="form-control" id="montoConfirmado" readonly />
+            </div>
+
+            
+           
+   
 
         <div class="text-center mt-4">
-            <button type="submit" class="btn btn-success btn-generar px-5">Crear DTE</button>
+            <button type="button" class="btn btn-success btn-generar px-5" data-bs-toggle="modal" data-bs-target="#modalConfirmarDTE">Generar DTE</button>
+
         </div>
     </form>
 </div>
+
+<div class="modal fade" id="modalConfirmarDTE" tabindex="-1" aria-labelledby="modalDTELabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalDTELabel">Confirmar generación de DTE</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">Ingrese su contraseña para confirmar</label>
+                <input type="password" class="form-control" id="confirmarContrasena" />
+                <small class="text-danger d-none" id="valContrasena">Contraseña incorrecta.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnGenerarDTE">Confirmar y Generar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- Modal flotante para agregar ítem -->
 <div class="modal fade" id="modalAgregarItem" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
@@ -315,6 +369,36 @@
         document.querySelector('input[name="MontoOperacion"]').value = (subtotalGlobal + ivaGlobal).toFixed(2);
         document.querySelector('input[name="TotalPagarResumen"]').value = (subtotalGlobal + ivaGlobal).toFixed(2);
     }
+
+    // confirmar pago 
+  
+    const btnConfirmarPago = document.getElementById("btnConfirmarPago");
+    const montoConfirmado = document.getElementById("montoConfirmado");
+    const montoUSD = document.getElementById("montoUSD");
+
+    btnConfirmarPago.addEventListener("click", function () {
+        const total = parseFloat(document.querySelector('input[name="TotalPagarResumen"]').value) || 0;
+        montoConfirmado.value = total.toFixed(2);
+    });
+
+
+    //funcion parala contraseña 
+     document.getElementById("btnGenerarDTE").addEventListener("click", function () {
+        const contrasenaIngresada = document.getElementById("confirmarContrasena").value.trim();
+        const contrasenaReal = document.querySelector('input[name="Contrasena"]').value.trim();
+
+        if (contrasenaIngresada !== contrasenaReal || contrasenaIngresada === "") {
+            document.getElementById("valContrasena").classList.remove("d-none");
+            return;
+        }
+
+        document.getElementById("valContrasena").classList.add("d-none");
+
+        // Simular envío del formulario
+        const form = document.querySelector('form');
+        form.submit();
+    });
+
 
     // Función para limpiar campos del modal
     function limpiarCamposModal() {

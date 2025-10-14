@@ -1,14 +1,15 @@
 ﻿using FacturacionElectronicaSV.Models;
 using FacturacionElectronicaSV.Models.DTE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+
 
 namespace FacturacionElectronicaSV.Services
 {
     public interface IFacturaService
     {
         FacturaDTE ConstruirFacturaDTE(Documento doc, List<DetalleDocumento> detalles, Receptor receptor, Emisor emisor);
+        byte[] GenerarPDF(Documento documento, List<DetalleDocumento> detalles, Receptor receptor, Emisor emisor);
     }
 
     public class FacturaService : IFacturaService
@@ -96,6 +97,51 @@ namespace FacturacionElectronicaSV.Services
                     }
                 }
             };
+        }
+
+        public byte[] GenerarPDF(Documento documento, List<DetalleDocumento> detalles, Receptor receptor, Emisor emisor)
+        {
+            using (var ms = new MemoryStream())
+            {
+                var doc = new iTextSharp.text.Document();
+
+                var writer = iTextSharp.text.pdf.PdfWriter.GetInstance(doc, ms);
+
+                doc.Open();
+
+                doc.Add(new Paragraph("DigiFactura SV"));
+                doc.Add(new Paragraph($"DTE Nº: {documento.NumeroControl}"));
+                doc.Add(new Paragraph($"Fecha: {documento.FechaEmision:dd/MM/yyyy}"));
+                doc.Add(new Paragraph($"Cliente: {receptor.Nombre}"));
+                doc.Add(new Paragraph($"Forma de Pago: {documento.FormaPago}"));
+                doc.Add(new Paragraph(" "));
+
+                var table = new PdfPTable(5);
+                table.AddCell("Descripción");
+                table.AddCell("Cantidad");
+                table.AddCell("Precio");
+                table.AddCell("Gravado");
+                table.AddCell("IVA");
+
+                foreach (var item in detalles)
+                {
+                    table.AddCell(item.Descripcion);
+                    table.AddCell(item.Cantidad.ToString());
+                    table.AddCell(item.PrecioUnitario.ToString("F2"));
+                    table.AddCell(item.MontoTotal.ToString("F2"));
+                    table.AddCell(item.IVA.ToString("F2"));
+                }
+
+                doc.Add(table);
+                doc.Add(new Paragraph(" "));
+                doc.Add(new Paragraph($"Subtotal: ${documento.SubTotal:F2}"));
+                doc.Add(new Paragraph($"IVA: ${documento.TotalIVA:F2}"));
+                doc.Add(new Paragraph($"Total a Pagar: ${documento.TotalPagar:F2}"));
+                doc.Add(new Paragraph($"En Letras: {documento.TotalLetras}"));
+
+                doc.Close();
+                return ms.ToArray();
+            }
         }
     }
 }
