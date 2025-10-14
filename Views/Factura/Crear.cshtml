@@ -65,6 +65,52 @@
     </div>
 
     <form asp-action="Crear" method="post" class="mt-4">
+       <h5 class="mt-4">Detalle de Factura</h5>
+        <table class="table table-bordered table-sm" id="tablaDetalles">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 40px;"></th> <!-- Columna para la X -->
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Venta Gravada</th>
+                    <th>IVA</th>
+                    <th>Producto</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="text-end mb-3">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAgregarItem">
+                <i class="fas fa-plus-circle"></i> Agregar ítem
+            </button>
+        </div>
+
+        <h5 class="mt-4">Resumen de Totales</h5>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Retención IVA</label>
+                <input type="number" class="form-control" name="RetencionIVA" value="0.00" readonly />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Retención Renta</label>
+                <input type="number" class="form-control" name="RetencionRenta" value="0.00" readonly />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Subtotal</label>
+                <input type="number" class="form-control" name="ResumenSubtotal" value="0.00" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Monto Total de la operación</label>
+                <input type="number" class="form-control" name="MontoOperacion" value="0.00" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Total a pagar</label>
+                <input type="number" class="form-control" name="TotalPagarResumen" value="0.00" readonly />
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label asp-for="IdCliente" class="form-label">Cliente</label>
@@ -118,29 +164,6 @@
             </div>
         </div>
 
-        <h5 class="mt-4">Detalle de Factura</h5>
-        <table class="table table-bordered table-sm" id="tablaDetalles">
-            <thead class="table-light">
-                <tr>
-                    <th>Código</th>
-                    <th>Descripción</th>
-                    <th>Cantidad</th>
-                    <th>Precio Unitario</th>
-                    <th>Venta Gravada</th>
-                    <th>IVA</th>
-                    <th>Tipo Item</th>
-                    <th>Unidad Medida</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <div class="text-end mb-3">
-            <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAgregarItem">
-                <i class="fas fa-plus-circle"></i> Agregar ítem
-            </button>
-        </div>
-
         <div class="text-center mt-4">
             <button type="submit" class="btn btn-success btn-generar px-5">Crear DTE</button>
         </div>
@@ -167,11 +190,6 @@
                         <small class="text-danger d-none" id="valCantidad">Requerido.</small>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Unidad</label>
-                        <input type="text" class="form-control" id="unidadMedida" required />
-                        <small class="text-danger d-none" id="valUnidad">Requerido.</small>
-                    </div>
-                    <div class="col-md-3">
                         <label class="form-label">Nombre Producto</label>
                         <input type="text" class="form-control" id="descripcion" required />
                         <small class="text-danger d-none" id="valDescripcion">Requerido.</small>
@@ -192,7 +210,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Impuesto</label>
                         <select class="form-select" id="impuesto">
-                            <option value="13">20 - Impuesto al Valor Agregado 13%</option>
+                            <option value="13">Impuesto al Valor Agregado 13%</option>
                         </select>
                     </div>
                     <div class="col-md-6">
@@ -213,9 +231,15 @@
     </div>
 </div>
 <script>
+    let itemIndex = 0;
+    let subtotalGlobal = 0;
+    let ivaGlobal = 0;
+
+    const tabla = document.getElementById("tablaDetalles").getElementsByTagName("tbody")[0];
+
+    // Confirmar ítem
     document.getElementById("btnConfirmarItem").addEventListener("click", function () {
         const cantidad = document.getElementById("cantidad").value.trim();
-        const unidad = document.getElementById("unidadMedida").value.trim();
         const descripcion = document.getElementById("descripcion").value.trim();
         const precio = parseFloat(document.getElementById("precioUnitario").value) || 0;
         const descuento = parseFloat(document.getElementById("descuento").value) || 0;
@@ -223,34 +247,86 @@
 
         // Validaciones visuales
         document.getElementById("valCantidad").classList.toggle("d-none", cantidad !== "");
-        document.getElementById("valUnidad").classList.toggle("d-none", unidad !== "");
         document.getElementById("valDescripcion").classList.toggle("d-none", descripcion !== "");
 
-        if (!cantidad || !unidad || !descripcion) return;
+        if (!cantidad || !descripcion) return;
 
+        // Cálculos por ítem
         const ventaGravada = precio * cantidad;
         const iva = ventaGravada * (impuesto / 100);
         const total = ventaGravada - descuento + iva;
 
+        // Acumuladores globales
+        subtotalGlobal += ventaGravada;
+        ivaGlobal += iva;
+
+        // Actualizar totales en pantalla
+        actualizarTotales();
+
         document.getElementById("totalCalculado").textContent = total.toFixed(2);
 
-        const tabla = document.getElementById("tablaDetalles").getElementsByTagName("tbody")[0];
+        // Insertar fila en tabla
         const fila = tabla.insertRow();
         fila.innerHTML = `
-            <td><input name="Detalles[0].Codigo" class="form-control form-control-sm" value="AUTO" readonly /></td>
-            <td><input name="Detalles[0].Descripcion" class="form-control form-control-sm" value="${descripcion}" /></td>
-            <td><input name="Detalles[0].Cantidad" class="form-control form-control-sm" value="${cantidad}" /></td>
-            <td><input name="Detalles[0].PrecioUnitario" class="form-control form-control-sm" value="${precio}" /></td>
-            <td><input name="Detalles[0].VentaGravada" class="form-control form-control-sm" value="${ventaGravada.toFixed(2)}" /></td>
-            <td><input name="Detalles[0].IVA" class="form-control form-control-sm" value="${iva.toFixed(2)}" /></td>
-            <td><input name="Detalles[0].TipoItem" class="form-control form-control-sm" value="Bien" /></td>
-            <td><input name="Detalles[0].UnidadMedida" class="form-control form-control-sm" value="${unidad}" /></td>
+            <td class="text-center">
+                <button type="button" class="btn btn-sm btn-danger btnEliminarFila">&times;</button>
+            </td>
+            <td><input name="Detalles[${itemIndex}].Codigo" class="form-control form-control-sm" value="AUTO" readonly /></td>
+            <td><input name="Detalles[${itemIndex}].Descripcion" class="form-control form-control-sm" value="${descripcion}" /></td>
+            <td><input name="Detalles[${itemIndex}].Cantidad" class="form-control form-control-sm" value="${cantidad}" /></td>
+            <td><input name="Detalles[${itemIndex}].PrecioUnitario" class="form-control form-control-sm" value="${precio}" /></td>
+            <td><input name="Detalles[${itemIndex}].VentaGravada" class="form-control form-control-sm" value="${ventaGravada.toFixed(2)}" /></td>
+            <td><input name="Detalles[${itemIndex}].IVA" class="form-control form-control-sm" value="${iva.toFixed(2)}" /></td>
+            <td><input name="Detalles[${itemIndex}].Producto" class="form-control form-control-sm" value="Bien" /></td>
         `;
 
-        // Reset y cerrar
-        document.querySelectorAll("#modalAgregarItem input").forEach(i => i.value = "");
-        document.getElementById("descuento").value = "0";
-        document.getElementById("totalCalculado").textContent = "0.00";
+        itemIndex++;
+
+        // Reset campos y cerrar modal
+        limpiarCamposModal();
         bootstrap.Modal.getInstance(document.getElementById("modalAgregarItem")).hide();
     });
+
+    // Cancelar ítem
+    document.querySelector('#modalAgregarItem .btn-secondary').addEventListener('click', function () {
+        limpiarCamposModal();
+    });
+
+    // Eliminar ítem
+    tabla.addEventListener("click", function (e) {
+        if (e.target.classList.contains("btnEliminarFila")) {
+            const fila = e.target.closest("tr");
+            const ventaGravada = parseFloat(fila.querySelector('input[name*="VentaGravada"]').value) || 0;
+            const iva = parseFloat(fila.querySelector('input[name*="IVA"]').value) || 0;
+
+            subtotalGlobal -= ventaGravada;
+            ivaGlobal -= iva;
+
+            fila.remove();
+            actualizarTotales();
+        }
+    });
+
+    // Función para actualizar totales
+    function actualizarTotales() {
+        document.querySelector('input[name="ResumenSubtotal"]').value = subtotalGlobal.toFixed(2);
+        document.querySelector('input[name="RetencionIVA"]').value = "0.00";
+        document.querySelector('input[name="RetencionRenta"]').value = "0.00";
+        document.querySelector('input[name="MontoOperacion"]').value = (subtotalGlobal + ivaGlobal).toFixed(2);
+        document.querySelector('input[name="TotalPagarResumen"]').value = (subtotalGlobal + ivaGlobal).toFixed(2);
+    }
+
+    // Función para limpiar campos del modal
+    function limpiarCamposModal() {
+        document.getElementById("cantidad").value = "";
+        document.getElementById("descripcion").value = "";
+        document.getElementById("precioUnitario").value = "";
+        document.getElementById("descuento").value = "0";
+        document.getElementById("totalCalculado").textContent = "0.00";
+
+        document.getElementById("valCantidad").classList.add("d-none");
+        document.getElementById("valDescripcion").classList.add("d-none");
+    }
 </script>
+
+
