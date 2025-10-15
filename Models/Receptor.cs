@@ -20,10 +20,10 @@ namespace FacturacionElectronicaSV.Models
         public string NumeroDocumento { get; set; }
 
         [StringLength(10)]
-        public string CodActividad { get; set; }
+        public string? CodActividad { get; set; }
 
         [StringLength(100)]
-        public string DescActividad { get; set; }
+        public string? DescActividad { get; set; }
 
         [StringLength(100)]
         public string Correo { get; set; }

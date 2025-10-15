@@ -3,6 +3,19 @@
 <div class="container mt-4">
     <h4>Registrar Cliente</h4>
 
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <strong>Por favor completa todos los campos obligatorios.</strong>
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
     <form asp-action="Crear" method="post">
         <div class="row g-3">
             <div class="col-md-6">
@@ -47,6 +60,10 @@
                 <label asp-for="Complemento" class="form-label">Complemento Dirección</label>
                 <input asp-for="Complemento" class="form-control" />
             </div>
+
+            <!-- Campos ocultos opcionales -->
+            <input type="hidden" asp-for="CodActividad" value="" />
+            <input type="hidden" asp-for="DescActividad" value="" />
         </div>
 
         <div class="text-center mt-4">

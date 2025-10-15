@@ -35,15 +35,18 @@ namespace FacturacionElectronicaSV.Controllers
         public IActionResult Crear(Receptor receptor)
         {
             if (!ModelState.IsValid)
+            {
+                ViewBag.Error = "Por favor completa todos los campos obligatorios.";
                 return View(receptor);
+            }
 
             _context.Receptores.Add(receptor);
             _context.SaveChanges();
 
+            Console.WriteLine("Cliente guardado: " + receptor.Nombre);
             TempData["Mensaje"] = "Cliente registrado correctamente.";
             return RedirectToAction("Index");
         }
-
 
         // GET: /Clientes/Editar/5
         public IActionResult Editar(int id)
