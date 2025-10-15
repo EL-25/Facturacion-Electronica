@@ -2,7 +2,7 @@
 using FacturacionElectronicaSV.Models.DTE;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-
+using System.Text.Json;
 
 namespace FacturacionElectronicaSV.Services
 {
@@ -10,6 +10,7 @@ namespace FacturacionElectronicaSV.Services
     {
         FacturaDTE ConstruirFacturaDTE(Documento doc, List<DetalleDocumento> detalles, Receptor receptor, Emisor emisor);
         byte[] GenerarPDF(Documento documento, List<DetalleDocumento> detalles, Receptor receptor, Emisor emisor);
+        string GenerarJson(Documento documento, List<DetalleDocumento> detalles, Receptor receptor, Emisor emisor);
     }
 
     public class FacturaService : IFacturaService
@@ -103,10 +104,8 @@ namespace FacturacionElectronicaSV.Services
         {
             using (var ms = new MemoryStream())
             {
-                var doc = new iTextSharp.text.Document();
-
-                var writer = iTextSharp.text.pdf.PdfWriter.GetInstance(doc, ms);
-
+                var doc = new Document();
+                var writer = PdfWriter.GetInstance(doc, ms);
                 doc.Open();
 
                 doc.Add(new Paragraph("DigiFactura SV"));
@@ -142,6 +141,16 @@ namespace FacturacionElectronicaSV.Services
                 doc.Close();
                 return ms.ToArray();
             }
+        }
+
+        public string GenerarJson(Documento documento, List<DetalleDocumento> detalles, Receptor receptor, Emisor emisor)
+        {
+            var facturaDTE = ConstruirFacturaDTE(documento, detalles, receptor, emisor);
+            return JsonSerializer.Serialize(facturaDTE, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            });
         }
     }
 }
