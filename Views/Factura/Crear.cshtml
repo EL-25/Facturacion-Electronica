@@ -64,12 +64,12 @@
         <small>Creación de Documento Tributario Electrónico</small>
     </div>
 
-    <form asp-action="Crear" method="post" class="mt-4">
-       <h5 class="mt-4">Detalle de Factura</h5>
+    <form asp-action="Generar" method="post" class="mt-4" id="formGenerarDTE">
+        <h5 class="mt-4">Detalle de Factura</h5>
         <table class="table table-bordered table-sm" id="tablaDetalles">
             <thead class="table-light">
                 <tr>
-                    <th style="width: 40px;"></th> <!-- Columna para la X -->
+                    <th style="width: 40px;"></th>
                     <th>Código</th>
                     <th>Descripción</th>
                     <th>Cantidad</th>
@@ -170,7 +170,6 @@
         <hr />
 
         <div class="row">
-            
             <div class="col-md-6 mb-3">
                 <label asp-for="FormaPago" class="form-label">Forma de Pago</label>
                 <div class="input-group">
@@ -191,36 +190,17 @@
                 <label class="form-label">Monto Confirmado</label>
                 <input type="number" class="form-control" id="montoConfirmado" readonly />
             </div>
+        </div>
 
-            
-           
-   
+        <input type="hidden" name="confirmarContrasena" id="campoConfirmarContrasena" />
 
         <div class="text-center mt-4">
-            <button type="button" class="btn btn-success btn-generar px-5" data-bs-toggle="modal" data-bs-target="#modalConfirmarDTE">Generar DTE</button>
-
+            <button type="button" class="btn btn-success px-5" data-bs-toggle="modal" data-bs-target="#modalConfirmarDTE">
+                Generar DTE
+            </button>
         </div>
     </form>
-</div>
 
-<div class="modal fade" id="modalConfirmarDTE" tabindex="-1" aria-labelledby="modalDTELabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="modalDTELabel">Confirmar generación de DTE</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <label class="form-label">Ingrese su contraseña para confirmar</label>
-                <input type="password" class="form-control" id="confirmarContrasena" />
-                <small class="text-danger d-none" id="valContrasena">Contraseña incorrecta.</small>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" id="btnGenerarDTE">Confirmar y Generar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 
@@ -284,6 +264,28 @@
         </div>
     </div>
 </div>
+
+<!-- Modal: Confirmar generación -->
+<div class="modal fade" id="modalConfirmarDTE" tabindex="-1" aria-labelledby="modalDTELabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalDTELabel">Confirmar generación de DTE</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">Ingrese su contraseña para confirmar</label>
+                <input type="password" class="form-control" id="confirmarContrasena" />
+                <small class="text-danger d-none" id="valContrasena">Debe ingresar su contraseña.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnGenerarDTE">Confirmar y Generar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     let itemIndex = 0;
     let subtotalGlobal = 0;
@@ -382,22 +384,23 @@
     });
 
 
-    //funcion parala contraseña 
-     document.getElementById("btnGenerarDTE").addEventListener("click", function () {
+    //funcion parala contraseña
+        document.getElementById("btnGenerarDTE").addEventListener("click", function () {
         const contrasenaIngresada = document.getElementById("confirmarContrasena").value.trim();
-        const contrasenaReal = document.querySelector('input[name="Contrasena"]').value.trim();
+        const campoConfirmar = document.getElementById("campoConfirmarContrasena");
+        const form = document.getElementById("formGenerarDTE");
 
-        if (contrasenaIngresada !== contrasenaReal || contrasenaIngresada === "") {
+        if (!contrasenaIngresada) {
             document.getElementById("valContrasena").classList.remove("d-none");
             return;
         }
 
+        campoConfirmar.value = contrasenaIngresada;
         document.getElementById("valContrasena").classList.add("d-none");
 
-        // Simular envío del formulario
-        const form = document.querySelector('form');
         form.submit();
     });
+
 
 
     // Función para limpiar campos del modal

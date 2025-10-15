@@ -48,7 +48,7 @@ namespace FacturacionElectronicaSV.Controllers
             var claims = new List<Claim>
             {
                 new(ClaimTypes.Name, usuario.NombreUsuario),
-                new Claim("NombreUsuario", usuario.NombreUsuario)
+                new("NombreUsuario", usuario.NombreUsuario)
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
