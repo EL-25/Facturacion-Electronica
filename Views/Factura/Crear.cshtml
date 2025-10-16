@@ -414,6 +414,23 @@
         document.getElementById("valCantidad").classList.add("d-none");
         document.getElementById("valDescripcion").classList.add("d-none");
     }
+
+    ["cantidad", "precioUnitario", "descuento", "impuesto"].forEach(id => {
+        document.getElementById(id).addEventListener("input", calcularTotalTemporal);
+    });
+
+    function calcularTotalTemporal() {
+        const cantidad = parseFloat(document.getElementById("cantidad").value) || 0;
+        const precio = parseFloat(document.getElementById("precioUnitario").value) || 0;
+        const descuento = parseFloat(document.getElementById("descuento").value) || 0;
+        const impuesto = parseFloat(document.getElementById("impuesto").value) || 0;
+
+        const ventaGravada = precio * cantidad;
+        const iva = ventaGravada * (impuesto / 100);
+        const total = ventaGravada - descuento + iva;
+
+        document.getElementById("totalCalculado").textContent = total.toFixed(2);
+    }
 </script>
 
 

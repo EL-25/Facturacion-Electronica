@@ -50,6 +50,90 @@ namespace FacturacionElectronicaSV.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        public IActionResult Crear(FacturaViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Convertir ViewModel a Model
+            var documento = new Documento
+            {
+                NumeroControl = model.NumeroControl,
+                FechaEmision = DateTime.Now,
+                FormaPago = model.FormaPago,
+                SubTotal = model.SubTotal,
+                TotalGravada = model.TotalGravada,
+                TotalIVA = model.TotalIVA,
+                TotalPagar = model.TotalPagar,
+                TotalLetras = model.TotalLetras,
+                CodigoGeneracion = Guid.NewGuid(),
+                TipoDTE = "01"
+            };
+
+            var detalles = model.Detalles.Select((d, i) => new DetalleDocumento
+            {
+                Cantidad = d.Cantidad,
+                Codigo = d.Codigo,
+                Descripcion = d.Descripcion,
+                PrecioUnitario = d.PrecioUnitario,
+                MontoTotal = d.VentaGravada,
+                IVA = d.IVA,
+                TipoItem = d.TipoItem,
+                UnidadMedida = d.UnidadMedida
+            }).ToList();
+
+            var receptor = new Receptor
+            {
+                Nombre = model.Receptor.Nombre,
+                Departamento = model.Receptor.Departamento,
+                Municipio = model.Receptor.Municipio,
+                Complemento = model.Receptor.Complemento,
+                Correo = model.Receptor.Email,
+                TipoDocumento = model.Receptor.TipoDocumento,
+                NumeroDocumento = "00000000-0",
+                CodActividad = "000",
+                DescActividad = "Sin actividad registrada"
+            };
+
+            var emisor = new Emisor
+            {
+                Nombre = model.Emisor.Nombre,
+                Departamento = model.Emisor.Departamento,
+                Municipio = model.Emisor.Municipio,
+                Complemento = model.Emisor.Complemento,
+                Correo = model.Emisor.Correo,
+                Telefono = model.Emisor.Telefono,
+                TipoDocumento = model.Emisor.TipoDocumento,
+                NIT = "0614-290786-101-3",
+                NRC = "123456-7",
+                CodActividad = "000",
+                DescActividad = "Servicios informáticos",
+                NombreComercial = "DigiFactura SV",
+                TipoEstablecimiento = "01"
+            };
+
+            // Generar PDF y JSON
+            var pdfBytes = _facturaService.GenerarPDF(documento, detalles, receptor, emisor);
+            var json = _facturaService.GenerarJson(documento, detalles, receptor, emisor);
+
+            // Usar el número de control como nombre base
+            var nombreBase = documento.NumeroControl ?? "DTE";
+
+            
+
+            // Pasar nombres y contenido a la vista de confirmación
+            TempData["JsonNombre"] = $"{nombreBase}.json";
+            TempData["PdfNombre"] = $"{nombreBase}.pdf";
+            TempData["JsonGenerado"] = json;
+
+            return RedirectToAction("Confirmacion");
+        }
+
+
+
         // POST: /Factura/Generar
         [HttpPost]
         public IActionResult Generar(string NumeroControl, string confirmarContrasena)
@@ -67,45 +151,27 @@ namespace FacturacionElectronicaSV.Controllers
             return RedirectToAction("Confirmacion");
         }
 
-        // GET: /Factura/Confirmacion
+        // GET: /Factura/Confirmacion       //esto si funciona 
         public IActionResult Confirmacion()
         {
+            // Asegura que TempData sobreviva si se refresca la vista
             TempData.Keep();
 
-            ViewBag.Json = TempData["JsonGenerado"];
-            ViewBag.JsonNombre = TempData["JsonNombre"];
-            ViewBag.PdfNombre = TempData["PdfNombre"];
+            // Recuperar nombres de archivo desde TempData
+            var jsonNombre = TempData["JsonNombre"] as string ?? "DTE.json";
+            var pdfNombre = TempData["PdfNombre"] as string ?? "DTE.pdf";
+
+            // Recuperar contenido JSON si lo necesitas para vista previa
+            var jsonContenido = TempData["JsonGenerado"] as string;
+
+            // Pasar datos a la vista
+            ViewBag.JsonNombre = jsonNombre;
+            ViewBag.PdfNombre = pdfNombre;
+            ViewBag.Json = jsonContenido;
+
             return View();
         }
 
-        // GET: /Factura/DescargarJson
-        public IActionResult DescargarJson()
-        {
-            TempData.Keep();
 
-            var json = TempData["JsonGenerado"] as string;
-            var nombre = TempData["JsonNombre"] as string ?? "DTE.json";
-
-            if (string.IsNullOrEmpty(json))
-                return RedirectToAction("Crear");
-
-            var bytes = Encoding.UTF8.GetBytes(json);
-            return File(bytes, "application/json", nombre);
-        }
-
-        // GET: /Factura/DescargarPDF
-        public IActionResult DescargarPDF()
-        {
-            TempData.Keep();
-
-            var pdfBase64 = TempData["PdfGenerado"] as string;
-            var nombre = TempData["PdfNombre"] as string ?? "DTE.pdf";
-
-            if (string.IsNullOrEmpty(pdfBase64))
-                return RedirectToAction("Crear");
-
-            var bytes = Convert.FromBase64String(pdfBase64);
-            return File(bytes, "application/pdf", nombre);
-        }
     }
 }

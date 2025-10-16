@@ -2,6 +2,7 @@
     ViewBag.Title = "Confirmación de Factura";
     var jsonNombre = ViewBag.JsonNombre as string ?? "DTE.json";
     var pdfNombre = ViewBag.PdfNombre as string ?? "DTE.pdf";
+    var jsonContenido = ViewBag.Json as string;
 }
 
 <div class="factura-card mt-4">
@@ -16,22 +17,30 @@
         <p>Tu Documento Tributario Electrónico ha sido creado con éxito.</p>
 
         <div class="mt-3">
-            <a href="@Url.Action("DescargarJson")" class="btn btn-primary">
-                Descargar JSON (@jsonNombre)
+            <a href="~/files/@ViewBag.JsonNombre" class="btn btn-primary" download>
+                Descargar JSON (@ViewBag.JsonNombre)
             </a>
         </div>
 
         <div class="mt-2">
-            <a href="@Url.Action("DescargarPDF")" class="btn btn-success" target="_blank">
-                Ver/Descargar PDF (@pdfNombre)
+            <a href="~/files/@ViewBag.PdfNombre" class="btn btn-success" target="_blank">
+                Ver/Descargar PDF (@ViewBag.PdfNombre)
             </a>
         </div>
 
         <hr class="mt-4" />
 
         <h4>Vista previa del JSON</h4>
-        <pre style="background-color: #f8f8f8; padding: 10px; border: 1px solid #ccc; max-height: 400px; overflow-y: auto;">
-@Html.Raw(ViewBag.JsonGenerado)
+
+        @if (!string.IsNullOrEmpty(jsonContenido))
+        {
+            <pre style="background-color: #f8f8f8; padding: 10px; border: 1px solid #ccc; max-height: 400px; overflow-y: auto;">
+    @Html.Raw(jsonContenido)
         </pre>
-    </div>
+        }
+        else
+        {
+            <div class="alert alert-warning">⚠️ No se pudo generar la vista previa del JSON.</div>
+        }
+
 </div>
