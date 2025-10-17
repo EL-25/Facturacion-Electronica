@@ -5,8 +5,9 @@ using FacturacionElectronicaSV.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace FacturacionElectronicaSV.Controllers
 {
@@ -122,17 +123,26 @@ namespace FacturacionElectronicaSV.Controllers
             // Usar el número de control como nombre base
             var nombreBase = documento.NumeroControl ?? "DTE";
 
-            
+            var ruta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files", $"{nombreBase}.json");
+            System.IO.File.WriteAllText(ruta, json);
 
-            // Pasar nombres y contenido a la vista de confirmación
+            var rutaPdf = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files", $"{nombreBase}.pdf");
+            System.IO.File.WriteAllBytes(rutaPdf, pdfBytes);
+
+            Console.WriteLine($"✅ JSON guardado en: {ruta}");
+            Console.WriteLine($"✅ PDF guardado en: {rutaPdf}");
+
+            if (!System.IO.File.Exists(ruta))
+            {
+                Console.WriteLine($"❌ El archivo no se guardó correctamente en: {ruta}");
+            }
+
             TempData["JsonNombre"] = $"{nombreBase}.json";
             TempData["PdfNombre"] = $"{nombreBase}.pdf";
             TempData["JsonGenerado"] = json;
 
             return RedirectToAction("Confirmacion");
         }
-
-
 
         // POST: /Factura/Generar
         [HttpPost]
@@ -147,31 +157,104 @@ namespace FacturacionElectronicaSV.Controllers
                 return View("Crear");
             }
 
-            TempData["NumeroControl"] = NumeroControl;
+            // Simulación mínima para generar el JSON
+            var documento = new Documento
+            {
+                NumeroControl = NumeroControl,
+                FechaEmision = DateTime.Now,
+                FormaPago = "01",
+                SubTotal = 100.00m,
+                TotalGravada = 100.00m,
+                TotalIVA = 13.00m,
+                TotalPagar = 113.00m,
+                TotalLetras = "Ciento trece dólares",
+                CodigoGeneracion = Guid.NewGuid(),
+                TipoDTE = "01"
+            };
+
+            var detalles = new List<DetalleDocumento>
+            {
+                new DetalleDocumento
+                {
+                    Cantidad = 1,
+                    Codigo = "AUTO",
+                    Descripcion = "Producto genérico",
+                    PrecioUnitario = 100.00m,
+                    MontoTotal = 100.00m,
+                    IVA = 13.00m,
+                    TipoItem = 1,
+                    UnidadMedida = 59
+                }
+            };
+
+            var receptor = _context.Receptores.FirstOrDefault() ?? new Receptor
+            {
+                Nombre = "Receptor genérico",
+                Departamento = "San Salvador",
+                Municipio = "San Salvador",
+                Complemento = "Centro",
+                Correo = "receptor@correo.com",
+                TipoDocumento = "DUI",
+                NumeroDocumento = "00000000-0",
+                CodActividad = "000",
+                DescActividad = "Sin actividad registrada"
+            };
+
+            var emisor = _context.Emisor.FirstOrDefault() ?? new Emisor
+            {
+                Nombre = "DigiFactura SV",
+                Departamento = "San Salvador",
+                Municipio = "San Salvador",
+                Complemento = "Centro",
+                Correo = "emisor@correo.com",
+                Telefono = "2222-2222",
+                TipoDocumento = "NIT",
+                NIT = "0614-290786-101-3",
+                NRC = "123456-7",
+                CodActividad = "000",
+                DescActividad = "Servicios informáticos",
+                NombreComercial = "DigiFactura SV",
+                TipoEstablecimiento = "01"
+            };
+
+            var json = _facturaService.GenerarJson(documento, detalles, receptor, emisor);
+            var pdfBytes = _facturaService.GenerarPDF(documento, detalles, receptor, emisor);
+
+            var nombreBase = $"{NumeroControl}_{DateTime.Now:yyyyMMdd_HHmmss}";
+            var carpetaFiles = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files");
+            if (!Directory.Exists(carpetaFiles)) Directory.CreateDirectory(carpetaFiles);
+
+            var ruta = Path.Combine(carpetaFiles, $"{nombreBase}.json");
+            System.IO.File.WriteAllText(ruta, json);
+
+            var rutaPdf = Path.Combine(carpetaFiles, $"{nombreBase}.pdf");
+            System.IO.File.WriteAllBytes(rutaPdf, pdfBytes);
+
+
+            Console.WriteLine($"✅ JSON guardado en: {ruta}");
+            Console.WriteLine($"✅ PDF guardado en: {rutaPdf}");
+
+            TempData["JsonNombre"] = $"{nombreBase}.json";
+            TempData["PdfNombre"] = $"{nombreBase}.pdf";
+            TempData["JsonGenerado"] = json;
+
             return RedirectToAction("Confirmacion");
         }
 
-        // GET: /Factura/Confirmacion       //esto si funciona 
+        // GET: /Factura/Confirmacion
         public IActionResult Confirmacion()
         {
-            // Asegura que TempData sobreviva si se refresca la vista
             TempData.Keep();
 
-            // Recuperar nombres de archivo desde TempData
             var jsonNombre = TempData["JsonNombre"] as string ?? "DTE.json";
             var pdfNombre = TempData["PdfNombre"] as string ?? "DTE.pdf";
-
-            // Recuperar contenido JSON si lo necesitas para vista previa
             var jsonContenido = TempData["JsonGenerado"] as string;
 
-            // Pasar datos a la vista
             ViewBag.JsonNombre = jsonNombre;
             ViewBag.PdfNombre = pdfNombre;
             ViewBag.Json = jsonContenido;
 
             return View();
         }
-
-
     }
 }

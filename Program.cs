@@ -20,6 +20,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Servicios
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IFacturaService, FacturaService>();
+builder.Services.AddSession();
 
 var app = builder.Build();
 
@@ -32,6 +33,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseSession();
 
 app.UseRouting();
 
