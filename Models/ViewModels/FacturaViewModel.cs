@@ -1,7 +1,15 @@
-﻿namespace FacturacionElectronicaSV.ViewModels
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FacturacionElectronicaSV.ViewModels
 {
     public class FacturaViewModel
     {
+        public string FechaDTE { get; set; }
+        public string HoraDTE { get; set; }
+
+        // Número DTE generado por backend (nuevo)
+        public string NumeroDTE { get; set; }
+
         // Datos generales
         public int IdCliente { get; set; }
         public string NumeroControl { get; set; }
@@ -50,13 +58,28 @@
 
     public class ReceptorViewModel
     {
+        [Required]
         public string TipoDocumento { get; set; }
+
+        [Required]
+        public string NumeroDocumento { get; set; }
+
+        [Required]
         public string Nombre { get; set; }
+
+        [Required]
         public string Departamento { get; set; }
+
+        [Required]
         public string Municipio { get; set; }
+
         public string Complemento { get; set; }
+
+        [Required]
+        [EmailAddress]
         public string Email { get; set; }
+
+        [Required]
         public string Telefono { get; set; }
     }
 }
-

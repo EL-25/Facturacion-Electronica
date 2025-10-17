@@ -104,18 +104,48 @@ namespace FacturacionElectronicaSV.Services
         {
             using (var ms = new MemoryStream())
             {
-                var doc = new Document();
+                // Márgenes: izquierda, derecha, arriba, abajo (en puntos)
+                var doc = new Document(PageSize.A4, 40f, 40f, 40f, 40f);
                 var writer = PdfWriter.GetInstance(doc, ms);
                 doc.Open();
 
-                doc.Add(new Paragraph("DigiFactura SV"));
-                doc.Add(new Paragraph($"DTE Nº: {documento.NumeroControl}"));
-                doc.Add(new Paragraph($"Fecha: {documento.FechaEmision:dd/MM/yyyy}"));
-                doc.Add(new Paragraph($"Cliente: {receptor.Nombre}"));
-                doc.Add(new Paragraph($"Forma de Pago: {documento.FormaPago}"));
+                // Fuentes
+                var fontHeader = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 14);
+                var fontNormal = FontFactory.GetFont(FontFactory.HELVETICA, 10);
+
+                // Encabezado
+                doc.Add(new Paragraph("DigiFactura SV", fontHeader));
+                doc.Add(new Paragraph($"DTE Nº: {documento.NumeroControl}", fontNormal));
+                doc.Add(new Paragraph($"Fecha: {documento.FechaEmision:dd/MM/yyyy}", fontNormal));
+                doc.Add(new Paragraph($"Forma de Pago: {documento.FormaPago}", fontNormal));
                 doc.Add(new Paragraph(" "));
 
-                var table = new PdfPTable(5);
+
+                // Receptor
+                doc.Add(new Paragraph($"Cliente: {receptor.Nombre}", fontNormal));
+                doc.Add(new Paragraph($"Documento: {receptor.TipoDocumento} - {receptor.NumeroDocumento}", fontNormal));
+                doc.Add(new Paragraph($"Actividad Económica: {receptor.DescActividad}", fontNormal));
+                doc.Add(new Paragraph($"Dirección: {receptor.Complemento}, {receptor.Municipio}, {receptor.Departamento}", fontNormal));
+                doc.Add(new Paragraph($"Correo: {receptor.Correo}", fontNormal));
+                doc.Add(new Paragraph($"Forma de Pago: {documento.FormaPago}", fontNormal));
+                doc.Add(new Paragraph(" "));
+
+
+                //  Inserta aquí los datos del emisor
+                doc.Add(new Paragraph($"Emisor: {emisor.Nombre}", fontNormal));
+                doc.Add(new Paragraph($"NIT: {emisor.NIT}", fontNormal));
+                doc.Add(new Paragraph($"Dirección: {emisor.Complemento}, {emisor.Municipio}, {emisor.Departamento}", fontNormal));
+                doc.Add(new Paragraph($"Email: {emisor.Correo}", fontNormal));
+                doc.Add(new Paragraph(" "));
+
+
+
+
+
+                // Tabla de ítems
+                var table = new PdfPTable(5) { WidthPercentage = 100 };
+                table.SetWidths(new float[] { 40f, 20f, 20f, 20f, 20f });
+
                 table.AddCell("Descripción");
                 table.AddCell("Cantidad");
                 table.AddCell("Precio");
@@ -126,22 +156,25 @@ namespace FacturacionElectronicaSV.Services
                 {
                     table.AddCell(item.Descripcion);
                     table.AddCell(item.Cantidad.ToString());
-                    table.AddCell(item.PrecioUnitario.ToString("F2"));
-                    table.AddCell(item.MontoTotal.ToString("F2"));
-                    table.AddCell(item.IVA.ToString("F2"));
+                    table.AddCell($"${item.PrecioUnitario:F2}");
+                    table.AddCell($"${item.MontoTotal:F2}");
+                    table.AddCell($"${item.IVA:F2}");
                 }
 
                 doc.Add(table);
                 doc.Add(new Paragraph(" "));
-                doc.Add(new Paragraph($"Subtotal: ${documento.SubTotal:F2}"));
-                doc.Add(new Paragraph($"IVA: ${documento.TotalIVA:F2}"));
-                doc.Add(new Paragraph($"Total a Pagar: ${documento.TotalPagar:F2}"));
-                doc.Add(new Paragraph($"En Letras: {documento.TotalLetras}"));
+
+                // Totales
+                doc.Add(new Paragraph($"Subtotal: ${documento.SubTotal:F2}", fontNormal));
+                doc.Add(new Paragraph($"IVA: ${documento.TotalIVA:F2}", fontNormal));
+                doc.Add(new Paragraph($"Total a Pagar: ${documento.TotalPagar:F2}", fontNormal));
+                doc.Add(new Paragraph($"En Letras: {documento.TotalLetras}", fontNormal));
 
                 doc.Close();
                 return ms.ToArray();
             }
         }
+
 
         public string GenerarJson(Documento documento, List<DetalleDocumento> detalles, Receptor receptor, Emisor emisor)
         {

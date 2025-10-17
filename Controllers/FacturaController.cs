@@ -28,9 +28,9 @@ namespace FacturacionElectronicaSV.Controllers
         {
             ViewBag.Clientes = _context.Receptores.ToList();
             ViewBag.FormasPago = new[] {
-                new { Codigo = "01", Nombre = "Contado" },
-                new { Codigo = "02", Nombre = "Crédito" }
-            };
+        new { Codigo = "01", Nombre = "Contado" },
+        new { Codigo = "02", Nombre = "Crédito" }
+    };
 
             var emisor = _context.Emisor.FirstOrDefault();
 
@@ -51,6 +51,7 @@ namespace FacturacionElectronicaSV.Controllers
             return View(model);
         }
 
+
         [HttpPost]
         public IActionResult Crear(FacturaViewModel model)
         {
@@ -59,7 +60,7 @@ namespace FacturacionElectronicaSV.Controllers
                 return View(model);
             }
 
-            // Convertir ViewModel a Model
+            // Convertir ViewModel a Documento
             var documento = new Documento
             {
                 NumeroControl = model.NumeroControl,
@@ -71,10 +72,12 @@ namespace FacturacionElectronicaSV.Controllers
                 TotalPagar = model.TotalPagar,
                 TotalLetras = model.TotalLetras,
                 CodigoGeneracion = Guid.NewGuid(),
-                TipoDTE = "01"
+                TipoDTE = "01",
+                FechaDTE = model.FechaDTE,
+                HoraDTE = model.HoraDTE
             };
 
-            var detalles = model.Detalles.Select((d, i) => new DetalleDocumento
+            var detalles = model.Detalles.Select(d => new DetalleDocumento
             {
                 Cantidad = d.Cantidad,
                 Codigo = d.Codigo,
@@ -94,7 +97,7 @@ namespace FacturacionElectronicaSV.Controllers
                 Complemento = model.Receptor.Complemento,
                 Correo = model.Receptor.Email,
                 TipoDocumento = model.Receptor.TipoDocumento,
-                NumeroDocumento = "00000000-0",
+                NumeroDocumento = model.Receptor.NumeroDocumento,
                 CodActividad = "000",
                 DescActividad = "Sin actividad registrada"
             };
@@ -116,11 +119,10 @@ namespace FacturacionElectronicaSV.Controllers
                 TipoEstablecimiento = "01"
             };
 
-            // Generar PDF y JSON
+            // Generar PDF y JSON con datos reales
             var pdfBytes = _facturaService.GenerarPDF(documento, detalles, receptor, emisor);
             var json = _facturaService.GenerarJson(documento, detalles, receptor, emisor);
 
-            // Usar el número de control como nombre base
             var nombreBase = documento.NumeroControl ?? "DTE";
 
             var ruta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files", $"{nombreBase}.json");
@@ -129,14 +131,6 @@ namespace FacturacionElectronicaSV.Controllers
             var rutaPdf = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files", $"{nombreBase}.pdf");
             System.IO.File.WriteAllBytes(rutaPdf, pdfBytes);
 
-            Console.WriteLine($"✅ JSON guardado en: {ruta}");
-            Console.WriteLine($"✅ PDF guardado en: {rutaPdf}");
-
-            if (!System.IO.File.Exists(ruta))
-            {
-                Console.WriteLine($"❌ El archivo no se guardó correctamente en: {ruta}");
-            }
-
             TempData["JsonNombre"] = $"{nombreBase}.json";
             TempData["PdfNombre"] = $"{nombreBase}.pdf";
             TempData["JsonGenerado"] = json;
@@ -144,71 +138,75 @@ namespace FacturacionElectronicaSV.Controllers
             return RedirectToAction("Confirmacion");
         }
 
+
         // POST: /Factura/Generar
         [HttpPost]
-        public IActionResult Generar(string NumeroControl, string confirmarContrasena)
+        public IActionResult Generar(FacturaViewModel model, string confirmarContrasena)
         {
+            // Validación de seguridad
             var nombreUsuario = User.FindFirst("NombreUsuario")?.Value;
             var usuario = _context.Usuario.FirstOrDefault(u => u.NombreUsuario == nombreUsuario);
 
             if (usuario == null || usuario.Clave != confirmarContrasena)
             {
                 ModelState.AddModelError("", "Contraseña incorrecta.");
-                return View("Crear");
+                return View("Crear", model);
             }
 
-            // Simulación mínima para generar el JSON
+            // Construcción del documento con datos reales
             var documento = new Documento
             {
-                NumeroControl = NumeroControl,
+                NumeroControl = model.NumeroControl,
                 FechaEmision = DateTime.Now,
-                FormaPago = "01",
-                SubTotal = 100.00m,
-                TotalGravada = 100.00m,
-                TotalIVA = 13.00m,
-                TotalPagar = 113.00m,
-                TotalLetras = "Ciento trece dólares",
+                FormaPago = model.FormaPago,
+                SubTotal = model.SubTotal,
+                TotalGravada = model.TotalGravada,
+                TotalIVA = model.TotalIVA,
+                TotalPagar = model.TotalPagar,
+                TotalLetras = model.TotalLetras,
                 CodigoGeneracion = Guid.NewGuid(),
-                TipoDTE = "01"
+                TipoDTE = "01",
+                FechaDTE = model.FechaDTE,
+                HoraDTE = model.HoraDTE
             };
+            model.NumeroDTE = documento.NumeroControl;
 
-            var detalles = new List<DetalleDocumento>
-            {
-                new DetalleDocumento
-                {
-                    Cantidad = 1,
-                    Codigo = "AUTO",
-                    Descripcion = "Producto genérico",
-                    PrecioUnitario = 100.00m,
-                    MontoTotal = 100.00m,
-                    IVA = 13.00m,
-                    TipoItem = 1,
-                    UnidadMedida = 59
-                }
-            };
 
-            var receptor = _context.Receptores.FirstOrDefault() ?? new Receptor
+            var detalles = model.Detalles.Select(d => new DetalleDocumento
             {
-                Nombre = "Receptor genérico",
-                Departamento = "San Salvador",
-                Municipio = "San Salvador",
-                Complemento = "Centro",
-                Correo = "receptor@correo.com",
-                TipoDocumento = "DUI",
-                NumeroDocumento = "00000000-0",
+                Cantidad = d.Cantidad,
+                Codigo = d.Codigo,
+                Descripcion = d.Descripcion,
+                PrecioUnitario = d.PrecioUnitario,
+                MontoTotal = d.VentaGravada,
+                IVA = d.IVA,
+                TipoItem = d.TipoItem,
+                UnidadMedida = d.UnidadMedida
+            }).ToList();
+
+            var receptor = new Receptor
+            {
+                Nombre = model.Receptor.Nombre,
+                Departamento = model.Receptor.Departamento,
+                Municipio = model.Receptor.Municipio,
+                Complemento = model.Receptor.Complemento,
+                Correo = model.Receptor.Email,
+                Telefono = model.Receptor.Telefono,
+                TipoDocumento = model.Receptor.TipoDocumento,
+                NumeroDocumento = model.Receptor.NumeroDocumento,
                 CodActividad = "000",
                 DescActividad = "Sin actividad registrada"
             };
 
-            var emisor = _context.Emisor.FirstOrDefault() ?? new Emisor
+            var emisor = new Emisor
             {
-                Nombre = "DigiFactura SV",
-                Departamento = "San Salvador",
-                Municipio = "San Salvador",
-                Complemento = "Centro",
-                Correo = "emisor@correo.com",
-                Telefono = "2222-2222",
-                TipoDocumento = "NIT",
+                Nombre = model.Emisor.Nombre,
+                Departamento = model.Emisor.Departamento,
+                Municipio = model.Emisor.Municipio,
+                Complemento = model.Emisor.Complemento,
+                Correo = model.Emisor.Correo,
+                Telefono = model.Emisor.Telefono,
+                TipoDocumento = model.Emisor.TipoDocumento,
                 NIT = "0614-290786-101-3",
                 NRC = "123456-7",
                 CodActividad = "000",
@@ -217,22 +215,16 @@ namespace FacturacionElectronicaSV.Controllers
                 TipoEstablecimiento = "01"
             };
 
-            var json = _facturaService.GenerarJson(documento, detalles, receptor, emisor);
+            // Generación de PDF y JSON
             var pdfBytes = _facturaService.GenerarPDF(documento, detalles, receptor, emisor);
+            var json = _facturaService.GenerarJson(documento, detalles, receptor, emisor);
 
-            var nombreBase = $"{NumeroControl}_{DateTime.Now:yyyyMMdd_HHmmss}";
+            var nombreBase = $"{documento.NumeroControl}_{DateTime.Now:yyyyMMdd_HHmmss}";
             var carpetaFiles = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files");
             if (!Directory.Exists(carpetaFiles)) Directory.CreateDirectory(carpetaFiles);
 
-            var ruta = Path.Combine(carpetaFiles, $"{nombreBase}.json");
-            System.IO.File.WriteAllText(ruta, json);
-
-            var rutaPdf = Path.Combine(carpetaFiles, $"{nombreBase}.pdf");
-            System.IO.File.WriteAllBytes(rutaPdf, pdfBytes);
-
-
-            Console.WriteLine($"✅ JSON guardado en: {ruta}");
-            Console.WriteLine($"✅ PDF guardado en: {rutaPdf}");
+            System.IO.File.WriteAllText(Path.Combine(carpetaFiles, $"{nombreBase}.json"), json);
+            System.IO.File.WriteAllBytes(Path.Combine(carpetaFiles, $"{nombreBase}.pdf"), pdfBytes);
 
             TempData["JsonNombre"] = $"{nombreBase}.json";
             TempData["PdfNombre"] = $"{nombreBase}.pdf";
@@ -240,6 +232,7 @@ namespace FacturacionElectronicaSV.Controllers
 
             return RedirectToAction("Confirmacion");
         }
+
 
         // GET: /Factura/Confirmacion
         public IActionResult Confirmacion()
@@ -256,5 +249,6 @@ namespace FacturacionElectronicaSV.Controllers
 
             return View();
         }
+
     }
 }

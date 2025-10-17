@@ -58,5 +58,12 @@
             [ForeignKey("Receptor")]
             public int IdReceptor { get; set; }
             public Receptor Receptor { get; set; }
-        }
+
+        // Campos visuales para PDF (no se guardan en BD)
+        [NotMapped]
+        public string FechaDTE { get; set; }
+
+        [NotMapped]
+        public string HoraDTE { get; set; }
+    }
     }

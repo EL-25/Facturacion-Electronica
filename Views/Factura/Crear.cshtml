@@ -62,7 +62,31 @@
         <img src="~/images/logo-digifactura.png" alt="Logo DigiFactura SV" width="60" class="mb-2" />
         <h4 class="mb-0">DigiFactura SV</h4>
         <small>Creación de Documento Tributario Electrónico</small>
+
+        <div class="row g-3 mt-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-primary">Fecha DTE</label>
+                <input type="text" class="form-control bg-light border-0" id="campoFechaDTE" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-primary">Hora</label>
+                <input type="text" class="form-control bg-light border-0" id="campoHoraDTE" readonly />
+            </div>
+        </div>
+        <div class="row g-3 mt-2">
+            <div class="col-md-6">
+                <label asp-for="NumeroDTE" class="form-label fw-bold text-success">Número DTE</label>
+                <input asp-for="NumeroDTE" class="form-control bg-light border-0" readonly />
+                <span asp-validation-for="NumeroDTE" class="text-danger"></span>
+            </div>
+        </div>
+
+
+        <!-- Campos ocultos para enviar al backend -->
+        <input type="hidden" asp-for="FechaDTE" id="inputFechaDTE" />
+        <input type="hidden" asp-for="HoraDTE" id="inputHoraDTE" />
     </div>
+
 
     <form asp-action="Generar" method="post" class="mt-4" id="formGenerarDTE">
         <h5 class="mt-4">Detalle de Factura</h5>
@@ -115,26 +139,71 @@
 
 
         <h5 class="mt-4">Datos del Receptor</h5>
+        <h5 class="mt-4">Datos del Receptor</h5>
         <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label asp-for="Receptor.TipoDocumento" class="form-label">Tipo Documento</label>
+                <select asp-for="Receptor.TipoDocumento" class="form-select" id="tipoDocumentoReceptor">
+                    <option value="">Seleccione...</option>
+                    <option value="DUI">DUI</option>
+                    <option value="NIT">NIT</option>
+                    <option value="Pasaporte">Pasaporte</option>
+                </select>
+                <span asp-validation-for="Receptor.TipoDocumento" class="text-danger"></span>
+            </div>
+            <div class="col-md-8" id="grupoNumeroDocumentoReceptor">
+                <label class="form-label">Número de Documento</label>
+                <input type="text" class="form-control" name="Receptor.NumeroDocumento" />
+            </div>
             <div class="col-md-6">
-                <label asp-for="IdCliente" class="form-label">Cliente</label>
-                <select asp-for="IdCliente" asp-items="@(new SelectList(ViewBag.Clientes, "IdReceptor", "Nombre"))" class="form-select"></select>
-                <span asp-validation-for="IdCliente" class="text-danger"></span>
+                <label asp-for="Receptor.Nombre" class="form-label">Nombre o Razón Social</label>
+                <input asp-for="Receptor.Nombre" class="form-control" />
+                <span asp-validation-for="Receptor.Nombre" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Receptor.Departamento" class="form-label">Departamento</label>
+                <input asp-for="Receptor.Departamento" class="form-control" />
+                <span asp-validation-for="Receptor.Departamento" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Receptor.Municipio" class="form-label">Municipio</label>
+                <input asp-for="Receptor.Municipio" class="form-control" />
+                <span asp-validation-for="Receptor.Municipio" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Receptor.Complemento" class="form-label">Complemento</label>
+                <input asp-for="Receptor.Complemento" class="form-control" />
+                <span asp-validation-for="Receptor.Complemento" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Receptor.Email" class="form-label">Correo electrónico</label>
+                <input asp-for="Receptor.Email" class="form-control" />
+                <span asp-validation-for="Receptor.Email" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Receptor.Telefono" class="form-label">Teléfono</label>
+                <input asp-for="Receptor.Telefono" class="form-control" />
+                <span asp-validation-for="Receptor.Telefono" class="text-danger"></span>
             </div>
         </div>
+
         <hr />
 
         <h5 class="mt-4">Datos del Emisor</h5>
         <div class="row g-3 mb-4">
             <div class="col-md-4">
                 <label asp-for="Emisor.TipoDocumento" class="form-label">Tipo Documento</label>
-                <select asp-for="Emisor.TipoDocumento" class="form-select">
+                <select asp-for="Emisor.TipoDocumento" class="form-select" id="tipoDocumentoEmisor">
                     <option value="">Seleccione...</option>
                     <option value="DUI">DUI</option>
                     <option value="NIT">NIT</option>
                     <option value="Pasaporte">Pasaporte</option>
                 </select>
                 <span asp-validation-for="Emisor.TipoDocumento" class="text-danger"></span>
+            </div>
+            <div class="col-md-8" id="grupoNumeroDocumentoEmisor">
+                <label class="form-label">Número de Documento</label>
+                <input type="text" class="form-control" name="Emisor.NumeroDocumento" />
             </div>
             <div class="col-md-8">
                 <label asp-for="Emisor.Nombre" class="form-label">Nombre o Razón Social</label>
@@ -167,6 +236,7 @@
                 <span asp-validation-for="Emisor.Telefono" class="text-danger"></span>
             </div>
         </div>
+
         <hr />
 
         <div class="row">
@@ -194,11 +264,21 @@
 
         <input type="hidden" name="confirmarContrasena" id="campoConfirmarContrasena" />
 
+        <input type="hidden" name="SubTotal" id="campoSubTotal" />
+        <input type="hidden" name="TotalIVA" id="campoTotalIVA" />
+        <input type="hidden" name="TotalPagar" id="campoTotalPagar" />
+        <input type="hidden" name="TotalLetras" id="campoTotalLetras" />
+
+
+
         <div class="text-center mt-4">
             <button type="button" class="btn btn-success px-5" data-bs-toggle="modal" data-bs-target="#modalConfirmarDTE">
                 Generar DTE
             </button>
         </div>
+
+ 
+
     </form>
 
 </div>
@@ -364,16 +444,25 @@
     });
 
     // Función para actualizar totales
-    function actualizarTotales() {
+        function actualizarTotales() {
+        const total = subtotalGlobal + ivaGlobal;
+
         document.querySelector('input[name="ResumenSubtotal"]').value = subtotalGlobal.toFixed(2);
         document.querySelector('input[name="RetencionIVA"]').value = "0.00";
         document.querySelector('input[name="RetencionRenta"]').value = "0.00";
-        document.querySelector('input[name="MontoOperacion"]').value = (subtotalGlobal + ivaGlobal).toFixed(2);
-        document.querySelector('input[name="TotalPagarResumen"]').value = (subtotalGlobal + ivaGlobal).toFixed(2);
+        document.querySelector('input[name="MontoOperacion"]').value = total.toFixed(2);
+        document.querySelector('input[name="TotalPagarResumen"]').value = total.toFixed(2);
+
+        // Campos ocultos para el backend
+        document.getElementById("campoSubTotal").value = subtotalGlobal.toFixed(2);
+        document.getElementById("campoTotalIVA").value = ivaGlobal.toFixed(2);
+        document.getElementById("campoTotalPagar").value = total.toFixed(2);
+        document.getElementById("campoTotalLetras").value = convertirNumeroALetras(total);
     }
 
-    // confirmar pago 
-  
+
+    // confirmar pago
+
     const btnConfirmarPago = document.getElementById("btnConfirmarPago");
     const montoConfirmado = document.getElementById("montoConfirmado");
     const montoUSD = document.getElementById("montoUSD");
@@ -431,6 +520,83 @@
 
         document.getElementById("totalCalculado").textContent = total.toFixed(2);
     }
+     // Mostrar/ocultar campo Número de Documento del Receptor
+    function toggleNumeroDocumentoReceptor() {
+        const tipo = document.getElementById("tipoDocumentoReceptor").value;
+        const grupo = document.getElementById("grupoNumeroDocumentoReceptor");
+        grupo.style.display = (tipo === "DUI" || tipo === "NIT" || tipo === "Pasaporte") ? "block" : "none";
+    }
+
+    document.getElementById("tipoDocumentoReceptor").addEventListener("change", toggleNumeroDocumentoReceptor);
+    window.addEventListener("DOMContentLoaded", toggleNumeroDocumentoReceptor);
+
+    // Mostrar/ocultar campo Número de Documento del Emisor
+    function toggleNumeroDocumentoEmisor() {
+        const tipo = document.getElementById("tipoDocumentoEmisor").value;
+        const grupo = document.getElementById("grupoNumeroDocumentoEmisor");
+        grupo.style.display = (tipo === "DUI" || tipo === "NIT" || tipo === "Pasaporte") ? "block" : "none";
+    }
+
+    document.getElementById("tipoDocumentoEmisor").addEventListener("change", toggleNumeroDocumentoEmisor);
+    window.addEventListener("DOMContentLoaded", toggleNumeroDocumentoEmisor);
+
+
+    // Mostrar fecha y hora actual en campos DTE
+    function mostrarFechaHoraDTE() {
+        const ahora = new Date();
+        const fecha = ahora.toLocaleDateString('es-SV');
+        const hora = ahora.toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        document.getElementById("campoFechaDTE").value = fecha;
+        document.getElementById("campoHoraDTE").value = hora;
+        document.getElementById("inputFechaDTE").value = fecha;
+        document.getElementById("inputHoraDTE").value = hora;
+    }
+
+        window.addEventListener("DOMContentLoaded", mostrarFechaHoraDTE);
+
+          // Convertir numeros a letras
+    function convertirNumeroALetras(numero) {
+        const unidades = ["", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
+        const decenas = ["", "diez", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"];
+        const especiales = {
+            10: "diez", 11: "once", 12: "doce", 13: "trece", 14: "catorce", 15: "quince",
+            16: "dieciséis", 17: "diecisiete", 18: "dieciocho", 19: "diecinueve"
+        };
+
+        function convertirParteEntera(n) {
+            if (n === 0) return "cero";
+            if (n < 10) return unidades[n];
+            if (n < 20) return especiales[n];
+            if (n < 100) {
+                const d = Math.floor(n / 10);
+                const u = n % 10;
+                return decenas[d] + (u > 0 ? " y " + unidades[u] : "");
+            }
+            if (n < 1000) {
+                const c = Math.floor(n / 100);
+                const r = n % 100;
+                const centenas = c === 1 ? "ciento" : c === 5 ? "quinientos" : c === 7 ? "setecientos" : c === 9 ? "novecientos" : unidades[c] + "cientos";
+                return (n === 100 ? "cien" : centenas + (r > 0 ? " " + convertirParteEntera(r) : ""));
+            }
+            if (n < 1000000) {
+                const miles = Math.floor(n / 1000);
+                const resto = n % 1000;
+                const milesTexto = miles === 1 ? "mil" : convertirParteEntera(miles) + " mil";
+                return milesTexto + (resto > 0 ? " " + convertirParteEntera(resto) : "");
+            }
+            return "Número demasiado grande";
+        }
+
+        const partes = numero.toFixed(2).split(".");
+        const parteEntera = parseInt(partes[0]);
+        const parteDecimal = partes[1];
+
+        return convertirParteEntera(parteEntera) + " dólares con " + parteDecimal + "/100";
+    }
+
+
+
 </script>
 
 

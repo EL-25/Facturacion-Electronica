@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FacturacionElectronicaSV.Models
 {
@@ -36,5 +37,8 @@ namespace FacturacionElectronicaSV.Models
 
         [StringLength(50)]
         public string Departamento { get; set; }
+
+        [NotMapped]
+        public string Telefono { get; set; }
     }
 }
