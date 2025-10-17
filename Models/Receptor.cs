@@ -39,6 +39,9 @@ namespace FacturacionElectronicaSV.Models
         public string Departamento { get; set; }
 
         [NotMapped]
+        [Required(ErrorMessage = "El campo Teléfono es obligatorio.")]
+        [Phone(ErrorMessage = "Ingresa un número de teléfono válido.")]
+        [StringLength(15, ErrorMessage = "El teléfono debe tener máximo 15 caracteres.")]
         public string Telefono { get; set; }
     }
 }

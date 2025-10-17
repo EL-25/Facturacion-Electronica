@@ -19,3 +19,6 @@ appsettings.Development.json
 
 # Archivos de publicación
 publish/
+
+# Configuración de la aplicación
+appsettings.json

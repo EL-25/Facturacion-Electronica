@@ -1,0 +1,82 @@
+﻿@model FacturacionElectronicaSV.Models.Receptor
+
+<div class="container mt-5">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white text-center">
+            <h4 class="mb-0">Edición de Cliente</h4>
+            <small class="text-light">Actualiza los datos del cliente con precisión institucional</small>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Editar" method="post">
+                <input type="hidden" asp-for="IdReceptor" />
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label asp-for="Nombre" class="form-label">Nombre o Razón Social</label>
+                        <input asp-for="Nombre" class="form-control border-start border-3 border-primary" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="TipoDocumento" class="form-label">Tipo de Documento</label>
+                        <select asp-for="TipoDocumento" class="form-select border-start border-3 border-secondary">
+                            <option value="DUI">DUI</option>
+                            <option value="NIT">NIT</option>
+                            <option value="Pasaporte">Pasaporte</option>
+                        </select>
+                        <span asp-validation-for="TipoDocumento" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="NumeroDocumento" class="form-label">Número de Documento</label>
+                        <input asp-for="NumeroDocumento" class="form-control border-start border-3 border-warning" />
+                        <span asp-validation-for="NumeroDocumento" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Correo" class="form-label">Correo Electrónico</label>
+                        <input asp-for="Correo" class="form-control border-start border-3 border-info" />
+                        <span asp-validation-for="Correo" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Telefono" class="form-label">Teléfono</label>
+                        <input asp-for="Telefono" class="form-control border-start border-3 border-success" />
+                        <span asp-validation-for="Telefono" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Departamento" class="form-label">Departamento</label>
+                        <input asp-for="Departamento" class="form-control border-start border-3 border-dark" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Municipio" class="form-label">Municipio</label>
+                        <input asp-for="Municipio" class="form-control border-start border-3 border-danger" />
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="Complemento" class="form-label">Complemento Dirección</label>
+                        <textarea asp-for="Complemento" class="form-control border-start border-3 border-secondary" rows="2"></textarea>
+                    </div>
+
+                    <input type="hidden" asp-for="CodActividad" />
+                    <input type="hidden" asp-for="DescActividad" />
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-outline-success px-5 rounded-pill fw-bold">
+                        Actualizar Cliente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
