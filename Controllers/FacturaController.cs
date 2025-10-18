@@ -145,7 +145,7 @@ namespace FacturacionElectronicaSV.Controllers
         [HttpPost]
         public IActionResult Generar(FacturaViewModel model, string confirmarContrasena)
         {
-            // Validación de seguridad
+            // Validación de seguridad (puede quemarse para pruebas)
             var nombreUsuario = User.FindFirst("NombreUsuario")?.Value;
             var usuario = _context.Usuario.FirstOrDefault(u => u.NombreUsuario == nombreUsuario);
 
@@ -155,10 +155,13 @@ namespace FacturacionElectronicaSV.Controllers
                 return View("Crear", model);
             }
 
-            // Construcción del documento con datos reales
+            // Generación del número DTE con formato oficial
+            var numeroDTE = $"DTE-{model.FormaPago}-{DateTime.Now:yyyyMMddHHmmss}";
+
+            // Construcción del documento
             var documento = new Documento
             {
-                NumeroControl = model.NumeroControl,
+                NumeroControl = numeroDTE,
                 FechaEmision = DateTime.Now,
                 FormaPago = model.FormaPago,
                 SubTotal = model.SubTotal,
@@ -171,8 +174,8 @@ namespace FacturacionElectronicaSV.Controllers
                 FechaDTE = model.FechaDTE,
                 HoraDTE = model.HoraDTE
             };
-            model.NumeroDTE = documento.NumeroControl;
 
+            model.NumeroDTE = numeroDTE;
 
             var detalles = model.Detalles.Select(d => new DetalleDocumento
             {
@@ -209,19 +212,19 @@ namespace FacturacionElectronicaSV.Controllers
                 Correo = model.Emisor.Correo,
                 Telefono = model.Emisor.Telefono,
                 TipoDocumento = model.Emisor.TipoDocumento,
-                NIT = "0614-290786-101-3",
-                NRC = "123456-7",
-                CodActividad = "000",
-                DescActividad = "Servicios informáticos",
-                NombreComercial = "DigiFactura SV",
-                TipoEstablecimiento = "01"
+                NIT = model.Emisor.NIT,
+                NRC = model.Emisor.NRC,
+                CodActividad = model.Emisor.CodActividad,
+                DescActividad = model.Emisor.DescActividad,
+                NombreComercial = model.Emisor.NombreComercial,
+                TipoEstablecimiento = model.Emisor.TipoEstablecimiento
             };
 
             // Generación de PDF y JSON
             var pdfBytes = _facturaService.GenerarPDF(documento, detalles, receptor, emisor);
             var json = _facturaService.GenerarJson(documento, detalles, receptor, emisor);
 
-            var nombreBase = $"{documento.NumeroControl}_{DateTime.Now:yyyyMMdd_HHmmss}";
+            var nombreBase = numeroDTE; // ✅ nombre de archivo = número DTE
             var carpetaFiles = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files");
             if (!Directory.Exists(carpetaFiles)) Directory.CreateDirectory(carpetaFiles);
 
@@ -234,6 +237,8 @@ namespace FacturacionElectronicaSV.Controllers
 
             return RedirectToAction("Confirmacion");
         }
+
+
 
 
         // GET: /Factura/Confirmacion
@@ -253,21 +258,21 @@ namespace FacturacionElectronicaSV.Controllers
         }
 
         // GET: /Factura/BuscarPorDTE
-        public IActionResult BuscarPorDTE(string codigo)
+        public IActionResult BuscarPorDTE(string numeroDTE)
         {
-            if (string.IsNullOrEmpty(codigo))
+            if (string.IsNullOrEmpty(numeroDTE))
             {
-                ViewBag.Error = "Debe ingresar un código de generación válido.";
+                ViewBag.Error = "Debe ingresar un número DTE válido.";
                 return View();
             }
 
             var carpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files");
-            var rutaJson = Path.Combine(carpeta, $"{codigo}.json");
-            var rutaPdf = Path.Combine(carpeta, $"{codigo}.pdf");
+            var rutaJson = Path.Combine(carpeta, $"{numeroDTE}.json");
+            var rutaPdf = Path.Combine(carpeta, $"{numeroDTE}.pdf");
 
             if (!System.IO.File.Exists(rutaJson) || !System.IO.File.Exists(rutaPdf))
             {
-                ViewBag.Error = "No se encontró una factura con ese código.";
+                ViewBag.Error = "No se encontró una factura con ese número DTE.";
                 return View();
             }
 
@@ -275,19 +280,20 @@ namespace FacturacionElectronicaSV.Controllers
             var factura = JsonConvert.DeserializeObject<FacturaDTE>(contenido);
 
             ViewBag.Factura = factura;
-            ViewBag.Codigo = codigo;
+            ViewBag.NumeroDTE = numeroDTE;
             return View();
         }
 
+
         // GET: /Factura/DescargarPDF
-        public IActionResult DescargarPDF(string codigo)
+        public IActionResult DescargarPDF(string numeroDTE)
         {
-            if (string.IsNullOrEmpty(codigo))
+            if (string.IsNullOrEmpty(numeroDTE))
             {
-                return NotFound("Código no proporcionado.");
+                return NotFound("Número DTE no proporcionado.");
             }
 
-            var rutaPdf = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files", $"{codigo}.pdf");
+            var rutaPdf = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files", $"{numeroDTE}.pdf");
 
             if (!System.IO.File.Exists(rutaPdf))
             {
@@ -295,22 +301,23 @@ namespace FacturacionElectronicaSV.Controllers
             }
 
             var contenido = System.IO.File.ReadAllBytes(rutaPdf);
-            return File(contenido, "application/pdf", $"{codigo}.pdf");
+            return File(contenido, "application/pdf", $"{numeroDTE}.pdf");
         }
+
 
         // POST: /Factura/EliminarFactura
         [HttpPost]
-        public IActionResult EliminarFactura(string codigo)
+        public IActionResult EliminarFactura(string numeroDTE)
         {
-            if (string.IsNullOrEmpty(codigo))
+            if (string.IsNullOrEmpty(numeroDTE))
             {
-                ViewBag.Error = "Código no proporcionado.";
-                return RedirectToAction("BuscarPorDTE", new { codigo });
+                ViewBag.Error = "Número DTE no proporcionado.";
+                return RedirectToAction("BuscarPorDTE", new { numeroDTE });
             }
 
             var carpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files");
-            var rutaJson = Path.Combine(carpeta, $"{codigo}.json");
-            var rutaPdf = Path.Combine(carpeta, $"{codigo}.pdf");
+            var rutaJson = Path.Combine(carpeta, $"{numeroDTE}.json");
+            var rutaPdf = Path.Combine(carpeta, $"{numeroDTE}.pdf");
 
             bool eliminado = false;
 
@@ -334,8 +341,9 @@ namespace FacturacionElectronicaSV.Controllers
             else
             {
                 ViewBag.Error = "No se encontraron archivos para eliminar.";
-                return RedirectToAction("BuscarPorDTE", new { codigo });
+                return RedirectToAction("BuscarPorDTE", new { numeroDTE });
             }
         }
+
     }
 }

@@ -73,13 +73,7 @@
                 <input type="text" class="form-control bg-light border-0" id="campoHoraDTE" readonly />
             </div>
         </div>
-        <div class="row g-3 mt-2">
-            <div class="col-md-6">
-                <label asp-for="NumeroDTE" class="form-label fw-bold text-success">Número DTE</label>
-                <input asp-for="NumeroDTE" class="form-control bg-light border-0" readonly />
-                <span asp-validation-for="NumeroDTE" class="text-danger"></span>
-            </div>
-        </div>
+        
 
 
         <!-- Campos ocultos para enviar al backend -->
@@ -203,7 +197,7 @@
             </div>
             <div class="col-md-8" id="grupoNumeroDocumentoEmisor">
                 <label class="form-label">Número de Documento</label>
-                <input type="text" class="form-control" name="Emisor.NumeroDocumento" />
+                <input type="text" class="form-control" name="Receptor.NumeroDocumento" />
             </div>
             <div class="col-md-8">
                 <label asp-for="Emisor.Nombre" class="form-label">Nombre o Razón Social</label>
@@ -235,7 +229,35 @@
                 <input asp-for="Emisor.Telefono" class="form-control" />
                 <span asp-validation-for="Emisor.Telefono" class="text-danger"></span>
             </div>
+
+            
+            <div class="col-md-6">
+                <label asp-for="Emisor.NRC" class="form-label">NRC</label>
+                <input asp-for="Emisor.NRC" class="form-control" />
+                <span asp-validation-for="Emisor.NRC" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Emisor.CodActividad" class="form-label">Código Actividad</label>
+                <input asp-for="Emisor.CodActividad" class="form-control" />
+                <span asp-validation-for="Emisor.CodActividad" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Emisor.DescActividad" class="form-label">Descripción Actividad</label>
+                <input asp-for="Emisor.DescActividad" class="form-control" />
+                <span asp-validation-for="Emisor.DescActividad" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Emisor.NombreComercial" class="form-label">Nombre Comercial</label>
+                <input asp-for="Emisor.NombreComercial" class="form-control" />
+                <span asp-validation-for="Emisor.NombreComercial" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Emisor.TipoEstablecimiento" class="form-label">Tipo Establecimiento</label>
+                <input asp-for="Emisor.TipoEstablecimiento" class="form-control" />
+                <span asp-validation-for="Emisor.TipoEstablecimiento" class="text-danger"></span>
+            </div>
         </div>
+
 
         <hr />
 

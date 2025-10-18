@@ -1,9 +1,10 @@
 ﻿@{
-    ViewData["Title"] = "Buscar DTE por Código";
+    ViewData["Title"] = "Buscar DTE por Número";
     var factura = ViewBag.Factura as FacturacionElectronicaSV.Models.DTE.FacturaDTE;
-    var codigo = ViewBag.Codigo as string;
+    var numeroDTE = ViewBag.NumeroDTE as string;
     var error = ViewBag.Error as string;
 }
+
 
 <style>
     .contenedor {
@@ -86,8 +87,8 @@
         }
 </style>
 
-<div class="contenedor">
-    <div class="titulo">Buscar Factura por Código DTE</div>
+<div class="contenedor fadeIn">
+    <div class="titulo">Consultar Factura por Número DTE</div>
 
     @if (TempData["Mensaje"] != null)
     {
@@ -105,28 +106,28 @@
 
     <form method="get" asp-action="BuscarPorDTE">
         <div class="campo">
-            <input type="text" name="codigo" placeholder="Ejemplo: _20251016_195515" value="@codigo" required />
+            <input type="text" name="numeroDTE" placeholder="Ejemplo: DTE-02-20251017233911" value="@numeroDTE" required />
         </div>
         <button type="submit" class="boton">Buscar</button>
+
         <div class="alert alert-info text-center" style="margin-top:20px; border-radius:8px;">
-    <i class="fas fa-info-circle"></i> Puedes <strong>volver al panel de documentos</strong> o <strong>emitir un nuevo DTE</strong desde aquí.
-</div>
+            <i class="fas fa-info-circle"></i> Puedes <strong>volver al panel de documentos</strong> o <strong>emitir un nuevo DTE</strong desde aquí.
+        </div>
 
-    <div style="display:flex; justify-content:space-between; margin-top:15px;">
-    <a href="/Documento/Index" class="boton" style="background-color:#6c757d;">
-        Volver al Panel
-    </a>
+        <div style="display:flex; justify-content:space-between; margin-top:15px;">
+            <a href="/Documento/Index" class="boton" style="background-color:#6c757d;">
+                Volver al Panel
+            </a>
 
-    <a href="/Factura/Crear" class="boton" style="background-color:#28a745;">
-        Emitir nuevo DTE
-    </a>
-    </div>
-
+            <a href="/Factura/Crear" class="boton" style="background-color:#28a745;">
+                Emitir nuevo DTE
+            </a>
+        </div>
     </form>
 
     @if (factura != null)
     {
-        <div class="datos">
+        <div class="datos mt-4">
             <h4>Detalles de la Factura</h4>
             <p><strong>Cliente:</strong> @factura.receptor.nombre</p>
             <p><strong>Fecha de Emisión:</strong> @factura.identificacion.fecEmi</p>
@@ -135,12 +136,12 @@
 
             <div class="acciones">
                 <form method="get" asp-action="DescargarPDF">
-                    <input type="hidden" name="codigo" value="@codigo" />
+                    <input type="hidden" name="numeroDTE" value="@numeroDTE" />
                     <button type="submit" class="boton">Descargar PDF</button>
                 </form>
 
                 <form method="post" asp-action="EliminarFactura">
-                    <input type="hidden" name="codigo" value="@codigo" />
+                    <input type="hidden" name="numeroDTE" value="@numeroDTE" />
                     <button type="submit" class="boton" style="background-color:#dc3545;">🗑️ Eliminar</button>
                 </form>
             </div>

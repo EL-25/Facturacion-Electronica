@@ -4,6 +4,8 @@ namespace FacturacionElectronicaSV.ViewModels
 {
     public class FacturaViewModel
     {
+        public int CondicionOperacion { get; set; } // contado y crédito
+
         public string FechaDTE { get; set; }
         public string HoraDTE { get; set; }
 
@@ -48,13 +50,23 @@ namespace FacturacionElectronicaSV.ViewModels
     public class EmisorViewModel
     {
         public string TipoDocumento { get; set; }
+        public string NumeroDocumento { get; set; } // si lo usás
         public string Nombre { get; set; }
         public string Departamento { get; set; }
         public string Municipio { get; set; }
         public string Complemento { get; set; }
         public string Correo { get; set; }
         public string Telefono { get; set; }
+
+        
+        public string NIT { get; set; }
+        public string NRC { get; set; }
+        public string CodActividad { get; set; }
+        public string DescActividad { get; set; }
+        public string NombreComercial { get; set; }
+        public string TipoEstablecimiento { get; set; }
     }
+
 
     public class ReceptorViewModel
     {

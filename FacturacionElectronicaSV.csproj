@@ -27,4 +27,6 @@
     <Folder Include="wwwroot\files\" />
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+
 </Project>
