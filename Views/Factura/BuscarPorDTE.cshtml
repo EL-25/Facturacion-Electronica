@@ -1,0 +1,149 @@
+﻿@{
+    ViewData["Title"] = "Buscar DTE por Código";
+    var factura = ViewBag.Factura as FacturacionElectronicaSV.Models.DTE.FacturaDTE;
+    var codigo = ViewBag.Codigo as string;
+    var error = ViewBag.Error as string;
+}
+
+<style>
+    .contenedor {
+        max-width: 720px;
+        margin: auto;
+        padding: 30px;
+        background: linear-gradient(to right, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    .titulo {
+        font-size: 30px;
+        font-weight: 700;
+        color: #004080;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .alert {
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        margin-bottom: 20px;
+    }
+
+    .campo {
+        margin-bottom: 20px;
+    }
+
+        .campo input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+    .boton {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: 0.3s ease;
+    }
+
+        .boton:hover {
+            background-color: #0056b3;
+        }
+
+    .datos {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 5px solid #007bff;
+        margin-top: 20px;
+    }
+
+        .datos h4 {
+            margin-bottom: 15px;
+            color: #343a40;
+            font-size: 1.2rem;
+        }
+
+        .datos p {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+    .acciones {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+        .acciones form {
+            display: inline;
+        }
+</style>
+
+<div class="contenedor">
+    <div class="titulo">Buscar Factura por Código DTE</div>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success text-center">
+            <i class="fas fa-check-circle"></i> @TempData["Mensaje"]
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger text-center">
+            <i class="fas fa-exclamation-triangle"></i> @error
+        </div>
+    }
+
+    <form method="get" asp-action="BuscarPorDTE">
+        <div class="campo">
+            <input type="text" name="codigo" placeholder="Ejemplo: _20251016_195515" value="@codigo" required />
+        </div>
+        <button type="submit" class="boton">Buscar</button>
+        <div class="alert alert-info text-center" style="margin-top:20px; border-radius:8px;">
+    <i class="fas fa-info-circle"></i> Puedes <strong>volver al panel de documentos</strong> o <strong>emitir un nuevo DTE</strong desde aquí.
+</div>
+
+    <div style="display:flex; justify-content:space-between; margin-top:15px;">
+    <a href="/Documento/Index" class="boton" style="background-color:#6c757d;">
+        Volver al Panel
+    </a>
+
+    <a href="/Factura/Crear" class="boton" style="background-color:#28a745;">
+        Emitir nuevo DTE
+    </a>
+    </div>
+
+    </form>
+
+    @if (factura != null)
+    {
+        <div class="datos">
+            <h4>Detalles de la Factura</h4>
+            <p><strong>Cliente:</strong> @factura.receptor.nombre</p>
+            <p><strong>Fecha de Emisión:</strong> @factura.identificacion.fecEmi</p>
+            <p><strong>Descripción:</strong> @factura.cuerpoDocumento[0].descripcion</p>
+            <p><strong>Total a Pagar:</strong> $@factura.resumen.totalPagar</p>
+
+            <div class="acciones">
+                <form method="get" asp-action="DescargarPDF">
+                    <input type="hidden" name="codigo" value="@codigo" />
+                    <button type="submit" class="boton">Descargar PDF</button>
+                </form>
+
+                <form method="post" asp-action="EliminarFactura">
+                    <input type="hidden" name="codigo" value="@codigo" />
+                    <button type="submit" class="boton" style="background-color:#dc3545;">🗑️ Eliminar</button>
+                </form>
+            </div>
+        </div>
+    }
+</div>

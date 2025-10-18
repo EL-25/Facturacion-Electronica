@@ -269,16 +269,22 @@
         <input type="hidden" name="TotalPagar" id="campoTotalPagar" />
         <input type="hidden" name="TotalLetras" id="campoTotalLetras" />
 
-
-
         <div class="text-center mt-4">
             <button type="button" class="btn btn-success px-5" data-bs-toggle="modal" data-bs-target="#modalConfirmarDTE">
                 Generar DTE
             </button>
         </div>
 
- 
+        <div class="text-center mt-4">
+            <button type="button" class="btn btn-secondary px-4" id="volverBtn">
+                Volver al Panel
+            </button>
+        </div>
 
+        <div id="mensajeVolver" class="alert alert-info text-center mt-3" style="display:none; border-radius:8px;">
+            <i class="fas fa-info-circle"></i> Volviendo al panel en <span id="contador">3</span>...
+        </div>
+        
     </form>
 
 </div>
@@ -595,8 +601,23 @@
         return convertirParteEntera(parteEntera) + " dólares con " + parteDecimal + "/100";
     }
 
+        // Botón volver con cuenta regresiva
+    document.getElementById("volverBtn").addEventListener("click", function () {
+        const mensaje = document.getElementById("mensajeVolver");
+        const contador = document.getElementById("contador");
+        let tiempo = 3;
 
+        mensaje.style.display = "block";
+
+        const intervalo = setInterval(() => {
+            tiempo--;
+            contador.textContent = tiempo;
+
+            if (tiempo === 0) {
+                clearInterval(intervalo);
+                window.location.href = "/Documento/Index";
+            }
+        }, 1000);
+    });
 
 </script>
-
-

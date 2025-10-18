@@ -1,9 +1,11 @@
 ﻿using FacturacionElectronicaSV.Data;
 using FacturacionElectronicaSV.Models;
+using FacturacionElectronicaSV.Models.DTE;
 using FacturacionElectronicaSV.Services;
 using FacturacionElectronicaSV.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -250,5 +252,90 @@ namespace FacturacionElectronicaSV.Controllers
             return View();
         }
 
+        // GET: /Factura/BuscarPorDTE
+        public IActionResult BuscarPorDTE(string codigo)
+        {
+            if (string.IsNullOrEmpty(codigo))
+            {
+                ViewBag.Error = "Debe ingresar un código de generación válido.";
+                return View();
+            }
+
+            var carpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files");
+            var rutaJson = Path.Combine(carpeta, $"{codigo}.json");
+            var rutaPdf = Path.Combine(carpeta, $"{codigo}.pdf");
+
+            if (!System.IO.File.Exists(rutaJson) || !System.IO.File.Exists(rutaPdf))
+            {
+                ViewBag.Error = "No se encontró una factura con ese código.";
+                return View();
+            }
+
+            var contenido = System.IO.File.ReadAllText(rutaJson);
+            var factura = JsonConvert.DeserializeObject<FacturaDTE>(contenido);
+
+            ViewBag.Factura = factura;
+            ViewBag.Codigo = codigo;
+            return View();
+        }
+
+        // GET: /Factura/DescargarPDF
+        public IActionResult DescargarPDF(string codigo)
+        {
+            if (string.IsNullOrEmpty(codigo))
+            {
+                return NotFound("Código no proporcionado.");
+            }
+
+            var rutaPdf = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files", $"{codigo}.pdf");
+
+            if (!System.IO.File.Exists(rutaPdf))
+            {
+                return NotFound("Archivo PDF no encontrado.");
+            }
+
+            var contenido = System.IO.File.ReadAllBytes(rutaPdf);
+            return File(contenido, "application/pdf", $"{codigo}.pdf");
+        }
+
+        // POST: /Factura/EliminarFactura
+        [HttpPost]
+        public IActionResult EliminarFactura(string codigo)
+        {
+            if (string.IsNullOrEmpty(codigo))
+            {
+                ViewBag.Error = "Código no proporcionado.";
+                return RedirectToAction("BuscarPorDTE", new { codigo });
+            }
+
+            var carpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files");
+            var rutaJson = Path.Combine(carpeta, $"{codigo}.json");
+            var rutaPdf = Path.Combine(carpeta, $"{codigo}.pdf");
+
+            bool eliminado = false;
+
+            if (System.IO.File.Exists(rutaJson))
+            {
+                System.IO.File.Delete(rutaJson);
+                eliminado = true;
+            }
+
+            if (System.IO.File.Exists(rutaPdf))
+            {
+                System.IO.File.Delete(rutaPdf);
+                eliminado = true;
+            }
+
+            if (eliminado)
+            {
+                TempData["Mensaje"] = "Factura eliminada correctamente.";
+                return RedirectToAction("BuscarPorDTE");
+            }
+            else
+            {
+                ViewBag.Error = "No se encontraron archivos para eliminar.";
+                return RedirectToAction("BuscarPorDTE", new { codigo });
+            }
+        }
     }
 }
