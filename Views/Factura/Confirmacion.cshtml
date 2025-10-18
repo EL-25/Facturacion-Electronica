@@ -5,6 +5,35 @@
     var jsonContenido = ViewBag.Json as string;
 }
 
+<style>
+    .volver-btn {
+        background: linear-gradient(135deg, #004080, #007bff);
+        color: white;
+        padding: 12px 24px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .volver-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+        background: linear-gradient(135deg, #0059b3, #00aaff);
+    }
+
+    .volver-btn i {
+        transition: transform 0.3s ease;
+    }
+
+    .volver-btn:hover i {
+        transform: translateX(-4px);
+    }
+</style>
+
 <div class="factura-card mt-4">
     <div class="factura-header text-center">
         <img src="~/images/logo-digifactura.png" alt="Logo DigiFactura SV" width="60" class="mb-2" />
@@ -13,18 +42,18 @@
     </div>
 
     <div class="mt-4">
-        <h2 class="text-success">✅ Factura generada correctamente</h2>
+        <h2 class="text-success">Factura generada correctamente</h2>
         <p>Tu Documento Tributario Electrónico ha sido creado con éxito.</p>
 
         <div class="mt-3">
-            <a href="~/files/@ViewBag.JsonNombre" class="btn btn-primary" download>
-                Descargar JSON (@ViewBag.JsonNombre)
+            <a href="~/files/@jsonNombre" class="btn btn-primary" download>
+                Descargar JSON (@jsonNombre)
             </a>
         </div>
 
         <div class="mt-2">
-            <a href="~/files/@ViewBag.PdfNombre" class="btn btn-success" target="_blank">
-                Ver/Descargar PDF (@ViewBag.PdfNombre)
+            <a href="~/files/@pdfNombre" class="btn btn-success" target="_blank">
+                Ver/Descargar PDF (@pdfNombre)
             </a>
         </div>
 
@@ -35,12 +64,18 @@
         @if (!string.IsNullOrEmpty(jsonContenido))
         {
             <pre style="background-color: #f8f8f8; padding: 10px; border: 1px solid #ccc; max-height: 400px; overflow-y: auto;">
-    @Html.Raw(jsonContenido)
-        </pre>
+            @Html.Raw(jsonContenido)
+            </pre>
         }
         else
         {
-            <div class="alert alert-warning">⚠️ No se pudo generar la vista previa del JSON.</div>
+            <div class="alert alert-warning">No se pudo generar la vista previa del JSON.</div>
         }
 
+        <div class="text-center mt-5">
+            <a href="/Documento/Index" class="btn volver-btn">
+                <i class="fas fa-arrow-left me-2"></i> Volver al Panel Principal
+            </a>
+        </div>
+    </div>
 </div>

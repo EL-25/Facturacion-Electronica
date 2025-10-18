@@ -238,9 +238,6 @@ namespace FacturacionElectronicaSV.Controllers
             return RedirectToAction("Confirmacion");
         }
 
-
-
-
         // GET: /Factura/Confirmacion
         public IActionResult Confirmacion()
         {
@@ -284,7 +281,6 @@ namespace FacturacionElectronicaSV.Controllers
             return View();
         }
 
-
         // GET: /Factura/DescargarPDF
         public IActionResult DescargarPDF(string numeroDTE)
         {
@@ -303,7 +299,6 @@ namespace FacturacionElectronicaSV.Controllers
             var contenido = System.IO.File.ReadAllBytes(rutaPdf);
             return File(contenido, "application/pdf", $"{numeroDTE}.pdf");
         }
-
 
         // POST: /Factura/EliminarFactura
         [HttpPost]
